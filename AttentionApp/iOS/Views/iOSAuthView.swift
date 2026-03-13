@@ -43,7 +43,7 @@ struct iOSAuthView: View {
                             Text("Email")
                                 .font(.subheadline.weight(.medium))
                                 .foregroundStyle(.secondary)
-                            TextField("email@example.com", text: $email)
+                            TextField("your@email.com", text: $email)
                                 .textFieldStyle(.roundedBorder)
                                 .textContentType(.emailAddress)
                                 .keyboardType(.emailAddress)
