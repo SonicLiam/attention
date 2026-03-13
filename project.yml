@@ -1,0 +1,150 @@
+name: Attention
+options:
+  bundleIdPrefix: com.sonicliam
+  deploymentTarget:
+    macOS: "15.0"
+    iOS: "18.0"
+    watchOS: "11.0"
+  xcodeVersion: "16.0"
+  groupSortPosition: top
+  createIntermediateGroups: true
+  defaultConfig: Debug
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+
+configs:
+  Debug: debug
+  Release: release
+
+targets:
+  Attention-macOS:
+    type: application
+    platform: macOS
+    sources:
+      - path: AttentionApp/Shared
+        group: Shared
+      - path: AttentionApp/macOS
+        group: macOS
+    settings:
+      base:
+        PRODUCT_NAME: Attention
+        PRODUCT_BUNDLE_IDENTIFIER: com.sonicliam.attention.macos
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.productivity
+        INFOPLIST_KEY_CFBundleDisplayName: Attention
+        GENERATE_INFOPLIST_FILE: YES
+    entitlements:
+      path: AttentionApp/macOS/Attention.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+
+  Attention-iOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: AttentionApp/Shared
+        group: Shared
+      - path: AttentionApp/iOS
+        group: iOS
+        excludes:
+          - "Widgets/**"
+    settings:
+      base:
+        PRODUCT_NAME: Attention
+        PRODUCT_BUNDLE_IDENTIFIER: com.sonicliam.attention.ios
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        INFOPLIST_KEY_CFBundleDisplayName: Attention
+        GENERATE_INFOPLIST_FILE: YES
+        SUPPORTS_MAC_DESIGNED_FOR_IPHONE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    entitlements:
+      path: AttentionApp/iOS/Attention.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.sonicliam.attention
+
+  Attention-watchOS:
+    type: application
+    platform: watchOS
+    sources:
+      - path: AttentionApp/Shared/Models
+        group: Shared/Models
+      - path: AttentionApp/Shared/Extensions
+        group: Shared/Extensions
+      - path: AttentionApp/Shared/Services
+        group: Shared/Services
+      - path: AttentionApp/Shared/ViewModels
+        group: Shared/ViewModels
+      - path: AttentionApp/watchOS
+        group: watchOS
+    settings:
+      base:
+        PRODUCT_NAME: Attention Watch
+        PRODUCT_BUNDLE_IDENTIFIER: com.sonicliam.attention.watchos
+        WATCHOS_DEPLOYMENT_TARGET: "11.0"
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.sonicliam.attention.ios
+        INFOPLIST_KEY_CFBundleDisplayName: Attention
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: Attention-iOS
+        embed: false
+        link: false
+
+  AttentionWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: AttentionApp/iOS/Widgets
+        group: Widgets
+      - path: AttentionApp/Shared/Models
+        group: Shared/Models
+      - path: AttentionApp/Shared/Extensions
+        group: Shared/Extensions
+    settings:
+      base:
+        PRODUCT_NAME: AttentionWidgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.sonicliam.attention.ios.widgets
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        INFOPLIST_KEY_CFBundleDisplayName: Attention Widgets
+    entitlements:
+      path: AttentionApp/iOS/Attention.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.sonicliam.attention
+
+schemes:
+  Attention (macOS):
+    build:
+      targets:
+        Attention-macOS: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+
+  Attention (iOS):
+    build:
+      targets:
+        Attention-iOS: all
+        AttentionWidgets: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+
+  Attention (watchOS):
+    build:
+      targets:
+        Attention-watchOS: all
+    run:
+      config: Debug
+    archive:
+      config: Release

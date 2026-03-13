@@ -1,0 +1,853 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		086EB90FF0666F914B9EF5CE /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C99CD8B66AA3F1F179A6E1 /* Tag.swift */; };
+		0A1B37716472722040161D94 /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD47A4615574749DDDFA6BC3 /* Todo.swift */; };
+		0EC763146872377A6C38815A /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C738DF953C3DDE38C6DCB103 /* WatchContentView.swift */; };
+		15B4B323E1BC4CA9D39AA111 /* Area.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16248BCA7FD82AAB8D67212 /* Area.swift */; };
+		185F2D017C4A2709A6F170C4 /* AttentionTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */; };
+		1C12F268444B0B2F16FA4A0F /* AttentionTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */; };
+		1DACABB60EE03D1F0F6701EC /* ChecklistItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */; };
+		2124445E1C63F370590E3704 /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
+		2ED8DB05B0A97CFFA825B2B4 /* DataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153463757B3F29F8CCDF9367 /* DataContainer.swift */; };
+		319139791CD7FF3EDBF23F51 /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
+		3CF7A295AA041D5A8FE65962 /* ProjectRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */; };
+		3F538F4F82F880AD83363809 /* MacContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424FF2F8806530F62F0E4CAC /* MacContentView.swift */; };
+		433650D565E962E91C2141EB /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C99CD8B66AA3F1F179A6E1 /* Tag.swift */; };
+		4DB9C0115852FBD1DE97ADA9 /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
+		57B5162654B2C314AF8A511F /* Area.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16248BCA7FD82AAB8D67212 /* Area.swift */; };
+		5CCE3D620683BCFE7625B3EA /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
+		682FBFE979DCC8B55D66A7EF /* AttentionTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */; };
+		685D83ED5152FC19E4F87B2A /* TodoListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */; };
+		72982A7DF0E7684EC11AA217 /* TodoListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */; };
+		7A20121D36A757D70B028623 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A89F1EFEC20541BDA232FF0 /* Project.swift */; };
+		8069AA7FA8DCCB5A49D25428 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A89F1EFEC20541BDA232FF0 /* Project.swift */; };
+		94EF9C14DD36F90D6472059C /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD47A4615574749DDDFA6BC3 /* Todo.swift */; };
+		970F17EB4A3717B00CA41969 /* DataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153463757B3F29F8CCDF9367 /* DataContainer.swift */; };
+		A4442D18F7B59DFA7040D098 /* AttentionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4DD0E4E935FCFECDC056F5 /* AttentionApp.swift */; };
+		A6F1C052538963E9198AD84A /* TodoListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */; };
+		A72EAB9B7F6AC8CB7CDDE718 /* ChecklistItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */; };
+		A92C05EBB44DFBDECFF94D5D /* ChecklistItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */; };
+		ACE4AB2751651573C43B3D8C /* DataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153463757B3F29F8CCDF9367 /* DataContainer.swift */; };
+		AFD96252A8F7DEF71DAF57AD /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD47A4615574749DDDFA6BC3 /* Todo.swift */; };
+		B17992A74854C63EE1E35641 /* TodoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */; };
+		B30FF3B0BD0BED38843DA597 /* Area.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16248BCA7FD82AAB8D67212 /* Area.swift */; };
+		B679777EE58D11A17F3524A4 /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD47A4615574749DDDFA6BC3 /* Todo.swift */; };
+		B887896AD243BE7355C6AF15 /* WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA7B0208A1E934BA7FEEB54 /* WatchApp.swift */; };
+		BC5481285FA62247A7A6D6C5 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C99CD8B66AA3F1F179A6E1 /* Tag.swift */; };
+		BD6BC7CE633BE03444EDEDBF /* TodoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */; };
+		BDF1BD059C5832F9D06047D1 /* ChecklistItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */; };
+		C65973AA598C34839A88433C /* AttentionWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C6D0588687069974DC35F6 /* AttentionWidgets.swift */; };
+		CC4D692FAFA565FA684A22EB /* DataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153463757B3F29F8CCDF9367 /* DataContainer.swift */; };
+		D6AFB4DE467D98D2A4D9D4D6 /* Area.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16248BCA7FD82AAB8D67212 /* Area.swift */; };
+		D9D256A4F75E223059656357 /* ProjectRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */; };
+		E188AF19FBF18B4B14883A64 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A89F1EFEC20541BDA232FF0 /* Project.swift */; };
+		E7728E545180A9B5FE2768EF /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A89F1EFEC20541BDA232FF0 /* Project.swift */; };
+		E7BDA90A353A2B75C670FC0B /* iOSContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E030676A3D6F3E33169375 /* iOSContentView.swift */; };
+		EB5A97C1883110CE8E6B4B38 /* TodoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */; };
+		F45160F1A921FCC51D221669 /* AttentionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4DD0E4E935FCFECDC056F5 /* AttentionApp.swift */; };
+		F5834C3F089D8061D8580428 /* ProjectRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */; };
+		F6DE98314B3EB3F1EAD194EA /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C99CD8B66AA3F1F179A6E1 /* Tag.swift */; };
+		F7FB3CACCF12417E05CCC6B1 /* AttentionTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D6BAB17A50091970A3768F05 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F099D8097F6798618D48698F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1F813B710C86229147068CB3;
+			remoteInfo = "Attention-iOS";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		06B192353C825BFDE42682C8 /* Attention-watchOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Attention-watchOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		096E06399E17AF27DB268EC4 /* Attention-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Attention-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		153463757B3F29F8CCDF9367 /* DataContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataContainer.swift; sourceTree = "<group>"; };
+		1C4DD0E4E935FCFECDC056F5 /* AttentionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionApp.swift; sourceTree = "<group>"; };
+		1E2B0E577721527BF472E0B9 /* Attention.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Attention.entitlements; sourceTree = "<group>"; };
+		21C99CD8B66AA3F1F179A6E1 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
+		29E030676A3D6F3E33169375 /* iOSContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSContentView.swift; sourceTree = "<group>"; };
+		424FF2F8806530F62F0E4CAC /* MacContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacContentView.swift; sourceTree = "<group>"; };
+		4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionTheme.swift; sourceTree = "<group>"; };
+		5EA7B0208A1E934BA7FEEB54 /* WatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchApp.swift; sourceTree = "<group>"; };
+		6563D5E560613A4781368157 /* Attention-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Attention-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoRepository.swift; sourceTree = "<group>"; };
+		6A89F1EFEC20541BDA232FF0 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
+		7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListViewModel.swift; sourceTree = "<group>"; };
+		83D772E3231A796D0EC486D1 /* AttentionWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = AttentionWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		B16248BCA7FD82AAB8D67212 /* Area.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Area.swift; sourceTree = "<group>"; };
+		B7A375F5810B139238F37646 /* Attention.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Attention.entitlements; sourceTree = "<group>"; };
+		BD47A4615574749DDDFA6BC3 /* Todo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Todo.swift; sourceTree = "<group>"; };
+		BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectRepository.swift; sourceTree = "<group>"; };
+		C738DF953C3DDE38C6DCB103 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
+		D9C6D0588687069974DC35F6 /* AttentionWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionWidgets.swift; sourceTree = "<group>"; };
+		E056D8C9B50B49491E6274AD /* Recurrence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recurrence.swift; sourceTree = "<group>"; };
+		E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistItem.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		05863F0872C98A305944C3B1 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				36D0A1F4823760DE975C5833 /* iOS */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		077A970FDC7209848A54E835 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				75450288DA314BCC6C22D16F /* macOS */,
+			);
+			name = macOS;
+			sourceTree = "<group>";
+		};
+		0E801EC3DD2F6D30E356058A /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */,
+				664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */,
+			);
+			name = Services;
+			path = AttentionApp/Shared/Services;
+			sourceTree = "<group>";
+		};
+		14106C0EE1229EC9E55F6C0E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				DDEEEF4AB99666473C3740B8 /* Models */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		1578FD3CCAF5068661E36B0A /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				EC5AFA83BDBBF80956E39E0E /* Extensions */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
+		2276612505B657CED44971CB /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				6A40BC8F7741C4418AB8A468 /* Widgets */,
+			);
+			name = Widgets;
+			sourceTree = "<group>";
+		};
+		26DC399E6E43E43504DE00A0 /* AttentionApp */ = {
+			isa = PBXGroup;
+			children = (
+				36D0A1F4823760DE975C5833 /* iOS */,
+				75450288DA314BCC6C22D16F /* macOS */,
+				6E401C82E9FE48F65A0B6AF7 /* Shared */,
+				AF768FE6A6E9C348EAF6A394 /* watchOS */,
+			);
+			path = AttentionApp;
+			sourceTree = "<group>";
+		};
+		2A1EB8040AA617C960FD9426 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				AF768FE6A6E9C348EAF6A394 /* watchOS */,
+			);
+			name = watchOS;
+			sourceTree = "<group>";
+		};
+		36D0A1F4823760DE975C5833 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				6582E429CACFAD182BF5BD55 /* Views */,
+				6A40BC8F7741C4418AB8A468 /* Widgets */,
+				1E2B0E577721527BF472E0B9 /* Attention.entitlements */,
+			);
+			name = iOS;
+			path = AttentionApp/iOS;
+			sourceTree = "<group>";
+		};
+		50E02927D8803BA82F7553EE = {
+			isa = PBXGroup;
+			children = (
+				26DC399E6E43E43504DE00A0 /* AttentionApp */,
+				05863F0872C98A305944C3B1 /* iOS */,
+				077A970FDC7209848A54E835 /* macOS */,
+				56D6D7073D18A5D4E13079AA /* Shared */,
+				2A1EB8040AA617C960FD9426 /* watchOS */,
+				2276612505B657CED44971CB /* Widgets */,
+				ECE54261209DBF0053FBCCC0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		56D6D7073D18A5D4E13079AA /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				1578FD3CCAF5068661E36B0A /* Extensions */,
+				14106C0EE1229EC9E55F6C0E /* Models */,
+				9C0014EB3463EC4835E42565 /* Services */,
+				6E401C82E9FE48F65A0B6AF7 /* Shared */,
+				B6467352EA8AE97E6B019F06 /* ViewModels */,
+			);
+			name = Shared;
+			sourceTree = "<group>";
+		};
+		6582E429CACFAD182BF5BD55 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				29E030676A3D6F3E33169375 /* iOSContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		6A40BC8F7741C4418AB8A468 /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				D9C6D0588687069974DC35F6 /* AttentionWidgets.swift */,
+			);
+			name = Widgets;
+			path = AttentionApp/iOS/Widgets;
+			sourceTree = "<group>";
+		};
+		6E401C82E9FE48F65A0B6AF7 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				EC5AFA83BDBBF80956E39E0E /* Extensions */,
+				DDEEEF4AB99666473C3740B8 /* Models */,
+				0E801EC3DD2F6D30E356058A /* Services */,
+				B7ABA801B926A5E833F9D529 /* ViewModels */,
+				1C4DD0E4E935FCFECDC056F5 /* AttentionApp.swift */,
+			);
+			name = Shared;
+			path = AttentionApp/Shared;
+			sourceTree = "<group>";
+		};
+		75450288DA314BCC6C22D16F /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				B0A205979A3846AC814B4ABF /* Views */,
+				B7A375F5810B139238F37646 /* Attention.entitlements */,
+			);
+			name = macOS;
+			path = AttentionApp/macOS;
+			sourceTree = "<group>";
+		};
+		7F23DCED99FE55FA81858CD9 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5EA7B0208A1E934BA7FEEB54 /* WatchApp.swift */,
+				C738DF953C3DDE38C6DCB103 /* WatchContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		9C0014EB3463EC4835E42565 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				0E801EC3DD2F6D30E356058A /* Services */,
+			);
+			name = Services;
+			sourceTree = "<group>";
+		};
+		AF768FE6A6E9C348EAF6A394 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				7F23DCED99FE55FA81858CD9 /* Views */,
+			);
+			name = watchOS;
+			path = AttentionApp/watchOS;
+			sourceTree = "<group>";
+		};
+		B0A205979A3846AC814B4ABF /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				424FF2F8806530F62F0E4CAC /* MacContentView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B6467352EA8AE97E6B019F06 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				B7ABA801B926A5E833F9D529 /* ViewModels */,
+			);
+			name = ViewModels;
+			sourceTree = "<group>";
+		};
+		B7ABA801B926A5E833F9D529 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */,
+			);
+			name = ViewModels;
+			path = AttentionApp/Shared/ViewModels;
+			sourceTree = "<group>";
+		};
+		DDEEEF4AB99666473C3740B8 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				B16248BCA7FD82AAB8D67212 /* Area.swift */,
+				E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */,
+				153463757B3F29F8CCDF9367 /* DataContainer.swift */,
+				6A89F1EFEC20541BDA232FF0 /* Project.swift */,
+				E056D8C9B50B49491E6274AD /* Recurrence.swift */,
+				21C99CD8B66AA3F1F179A6E1 /* Tag.swift */,
+				BD47A4615574749DDDFA6BC3 /* Todo.swift */,
+			);
+			name = Models;
+			path = AttentionApp/Shared/Models;
+			sourceTree = "<group>";
+		};
+		EC5AFA83BDBBF80956E39E0E /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */,
+			);
+			name = Extensions;
+			path = AttentionApp/Shared/Extensions;
+			sourceTree = "<group>";
+		};
+		ECE54261209DBF0053FBCCC0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6563D5E560613A4781368157 /* Attention-iOS.app */,
+				096E06399E17AF27DB268EC4 /* Attention-macOS.app */,
+				06B192353C825BFDE42682C8 /* Attention-watchOS.app */,
+				83D772E3231A796D0EC486D1 /* AttentionWidgets.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1E2A6A5F383E62806EDEA8D9 /* Attention-macOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B4F848702246A236161641CB /* Build configuration list for PBXNativeTarget "Attention-macOS" */;
+			buildPhases = (
+				5087BBA9106858AF7457D302 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Attention-macOS";
+			packageProductDependencies = (
+			);
+			productName = "Attention-macOS";
+			productReference = 096E06399E17AF27DB268EC4 /* Attention-macOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		1F813B710C86229147068CB3 /* Attention-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2A10998DDC71A1EB519DE903 /* Build configuration list for PBXNativeTarget "Attention-iOS" */;
+			buildPhases = (
+				61F03E803DDA613C975E7FA3 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Attention-iOS";
+			packageProductDependencies = (
+			);
+			productName = "Attention-iOS";
+			productReference = 6563D5E560613A4781368157 /* Attention-iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		55D9DCC594541A2D1D654E9E /* Attention-watchOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3425AA17BF75388F5E2D751E /* Build configuration list for PBXNativeTarget "Attention-watchOS" */;
+			buildPhases = (
+				4B855388B4A4D6E53B3CF657 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				164C5FBF90E4FA30057F75EB /* PBXTargetDependency */,
+			);
+			name = "Attention-watchOS";
+			packageProductDependencies = (
+			);
+			productName = "Attention-watchOS";
+			productReference = 06B192353C825BFDE42682C8 /* Attention-watchOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8747F4674E8E72B87D1EA4D7 /* AttentionWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1117F7219A281FA57BC1BAC4 /* Build configuration list for PBXNativeTarget "AttentionWidgets" */;
+			buildPhases = (
+				18E431A7BBBBA1C677D2350A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AttentionWidgets;
+			packageProductDependencies = (
+			);
+			productName = AttentionWidgets;
+			productReference = 83D772E3231A796D0EC486D1 /* AttentionWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F099D8097F6798618D48698F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 3D5D873882D3DF75CBC94E19 /* Build configuration list for PBXProject "Attention" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 50E02927D8803BA82F7553EE;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = ECE54261209DBF0053FBCCC0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1F813B710C86229147068CB3 /* Attention-iOS */,
+				1E2A6A5F383E62806EDEA8D9 /* Attention-macOS */,
+				55D9DCC594541A2D1D654E9E /* Attention-watchOS */,
+				8747F4674E8E72B87D1EA4D7 /* AttentionWidgets */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		18E431A7BBBBA1C677D2350A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D6AFB4DE467D98D2A4D9D4D6 /* Area.swift in Sources */,
+				185F2D017C4A2709A6F170C4 /* AttentionTheme.swift in Sources */,
+				C65973AA598C34839A88433C /* AttentionWidgets.swift in Sources */,
+				BDF1BD059C5832F9D06047D1 /* ChecklistItem.swift in Sources */,
+				CC4D692FAFA565FA684A22EB /* DataContainer.swift in Sources */,
+				8069AA7FA8DCCB5A49D25428 /* Project.swift in Sources */,
+				319139791CD7FF3EDBF23F51 /* Recurrence.swift in Sources */,
+				086EB90FF0666F914B9EF5CE /* Tag.swift in Sources */,
+				0A1B37716472722040161D94 /* Todo.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4B855388B4A4D6E53B3CF657 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				57B5162654B2C314AF8A511F /* Area.swift in Sources */,
+				1C12F268444B0B2F16FA4A0F /* AttentionTheme.swift in Sources */,
+				A92C05EBB44DFBDECFF94D5D /* ChecklistItem.swift in Sources */,
+				2ED8DB05B0A97CFFA825B2B4 /* DataContainer.swift in Sources */,
+				E188AF19FBF18B4B14883A64 /* Project.swift in Sources */,
+				D9D256A4F75E223059656357 /* ProjectRepository.swift in Sources */,
+				5CCE3D620683BCFE7625B3EA /* Recurrence.swift in Sources */,
+				BC5481285FA62247A7A6D6C5 /* Tag.swift in Sources */,
+				94EF9C14DD36F90D6472059C /* Todo.swift in Sources */,
+				A6F1C052538963E9198AD84A /* TodoListViewModel.swift in Sources */,
+				BD6BC7CE633BE03444EDEDBF /* TodoRepository.swift in Sources */,
+				B887896AD243BE7355C6AF15 /* WatchApp.swift in Sources */,
+				0EC763146872377A6C38815A /* WatchContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5087BBA9106858AF7457D302 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				15B4B323E1BC4CA9D39AA111 /* Area.swift in Sources */,
+				F45160F1A921FCC51D221669 /* AttentionApp.swift in Sources */,
+				682FBFE979DCC8B55D66A7EF /* AttentionTheme.swift in Sources */,
+				A72EAB9B7F6AC8CB7CDDE718 /* ChecklistItem.swift in Sources */,
+				ACE4AB2751651573C43B3D8C /* DataContainer.swift in Sources */,
+				3F538F4F82F880AD83363809 /* MacContentView.swift in Sources */,
+				7A20121D36A757D70B028623 /* Project.swift in Sources */,
+				F5834C3F089D8061D8580428 /* ProjectRepository.swift in Sources */,
+				2124445E1C63F370590E3704 /* Recurrence.swift in Sources */,
+				F6DE98314B3EB3F1EAD194EA /* Tag.swift in Sources */,
+				B679777EE58D11A17F3524A4 /* Todo.swift in Sources */,
+				685D83ED5152FC19E4F87B2A /* TodoListViewModel.swift in Sources */,
+				B17992A74854C63EE1E35641 /* TodoRepository.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		61F03E803DDA613C975E7FA3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B30FF3B0BD0BED38843DA597 /* Area.swift in Sources */,
+				A4442D18F7B59DFA7040D098 /* AttentionApp.swift in Sources */,
+				F7FB3CACCF12417E05CCC6B1 /* AttentionTheme.swift in Sources */,
+				1DACABB60EE03D1F0F6701EC /* ChecklistItem.swift in Sources */,
+				970F17EB4A3717B00CA41969 /* DataContainer.swift in Sources */,
+				E7728E545180A9B5FE2768EF /* Project.swift in Sources */,
+				3CF7A295AA041D5A8FE65962 /* ProjectRepository.swift in Sources */,
+				4DB9C0115852FBD1DE97ADA9 /* Recurrence.swift in Sources */,
+				433650D565E962E91C2141EB /* Tag.swift in Sources */,
+				AFD96252A8F7DEF71DAF57AD /* Todo.swift in Sources */,
+				72982A7DF0E7684EC11AA217 /* TodoListViewModel.swift in Sources */,
+				EB5A97C1883110CE8E6B4B38 /* TodoRepository.swift in Sources */,
+				E7BDA90A353A2B75C670FC0B /* iOSContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		164C5FBF90E4FA30057F75EB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1F813B710C86229147068CB3 /* Attention-iOS */;
+			targetProxy = D6BAB17A50091970A3768F05 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		4C805E3EAF3362E8B1167574 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
+		61C445EF69A50D4CB49F5714 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Attention;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sonicliam.attention.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonicliam.attention.watchos;
+				PRODUCT_NAME = "Attention Watch";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
+		775278F84D9A2950FAF75936 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AttentionApp/iOS/Attention.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Attention Widgets";
+				INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonicliam.attention.ios.widgets;
+				PRODUCT_NAME = AttentionWidgets;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7C98A5132AA797F368DE2C83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AttentionApp/iOS/Attention.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Attention;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonicliam.attention.ios;
+				PRODUCT_NAME = Attention;
+				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		936A17CE58CFA6D964568B42 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AttentionApp/iOS/Attention.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Attention Widgets";
+				INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonicliam.attention.ios.widgets;
+				PRODUCT_NAME = AttentionWidgets;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		C951C0AFA3E98F6E13B5D154 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = AttentionApp/macOS/Attention.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Attention;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonicliam.attention.macos;
+				PRODUCT_NAME = Attention;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		D03449A0325316237897BCA8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Attention;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.sonicliam.attention.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonicliam.attention.watchos;
+				PRODUCT_NAME = "Attention Watch";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		D41420C512C5804940B6A921 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		F2BCE560A842C6FB7632BF1F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AttentionApp/iOS/Attention.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Attention;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonicliam.attention.ios;
+				PRODUCT_NAME = Attention;
+				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		FB3A07DC3A75B39D3F28E3E4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = AttentionApp/macOS/Attention.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Attention;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sonicliam.attention.macos;
+				PRODUCT_NAME = Attention;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1117F7219A281FA57BC1BAC4 /* Build configuration list for PBXNativeTarget "AttentionWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				775278F84D9A2950FAF75936 /* Debug */,
+				936A17CE58CFA6D964568B42 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		2A10998DDC71A1EB519DE903 /* Build configuration list for PBXNativeTarget "Attention-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7C98A5132AA797F368DE2C83 /* Debug */,
+				F2BCE560A842C6FB7632BF1F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3425AA17BF75388F5E2D751E /* Build configuration list for PBXNativeTarget "Attention-watchOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D03449A0325316237897BCA8 /* Debug */,
+				61C445EF69A50D4CB49F5714 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3D5D873882D3DF75CBC94E19 /* Build configuration list for PBXProject "Attention" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D41420C512C5804940B6A921 /* Debug */,
+				4C805E3EAF3362E8B1167574 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B4F848702246A236161641CB /* Build configuration list for PBXNativeTarget "Attention-macOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB3A07DC3A75B39D3F28E3E4 /* Debug */,
+				C951C0AFA3E98F6E13B5D154 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F099D8097F6798618D48698F /* Project object */;
+}
