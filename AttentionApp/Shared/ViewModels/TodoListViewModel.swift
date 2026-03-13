@@ -91,6 +91,9 @@ final class TodoListViewModel {
     var showQuickEntry: Bool = false
     var showLogbook: Bool = false
 
+    // Sync
+    var syncEngine: SyncEngine?
+
     // Batch selection (macOS)
     var selectedTodos: Set<UUID> = []
     var isBatchMode: Bool { !selectedTodos.isEmpty }
@@ -196,6 +199,7 @@ final class TodoListViewModel {
         )
 
         try? repo.save()
+        notifySync()
         refresh()
     }
 
@@ -213,6 +217,7 @@ final class TodoListViewModel {
             project: project
         )
         try? repo.save()
+        notifySync()
         refresh()
     }
 
@@ -223,6 +228,7 @@ final class TodoListViewModel {
             todo.complete()
             NotificationService.shared.cancelNotifications(for: todo.id)
             try? todoRepository?.save()
+            notifySync()
             refresh()
         }
     }
@@ -230,6 +236,7 @@ final class TodoListViewModel {
     func uncompleteTodo(_ todo: Todo) {
         todo.uncomplete()
         try? todoRepository?.save()
+        notifySync()
         refresh()
     }
 
@@ -237,6 +244,7 @@ final class TodoListViewModel {
         NotificationService.shared.cancelNotifications(for: todo.id)
         todo.cancel()
         try? todoRepository?.save()
+        notifySync()
         if selectedTodo?.id == todo.id {
             selectedTodo = nil
         }
@@ -246,6 +254,7 @@ final class TodoListViewModel {
     func permanentlyDelete(_ todo: Todo) {
         todoRepository?.delete(todo)
         try? todoRepository?.save()
+        notifySync()
         if selectedTodo?.id == todo.id {
             selectedTodo = nil
         }
@@ -255,12 +264,14 @@ final class TodoListViewModel {
     func moveTodoToToday(_ todo: Todo) {
         todo.scheduleForToday()
         try? todoRepository?.save()
+        notifySync()
         refresh()
     }
 
     func scheduleFor(_ todo: Todo, date: Date) {
         todo.scheduleFor(date)
         try? todoRepository?.save()
+        notifySync()
         refresh()
     }
 
@@ -268,6 +279,7 @@ final class TodoListViewModel {
         todo.priority = priority
         todo.markDirty()
         try? todoRepository?.save()
+        notifySync()
         refresh()
     }
 
@@ -275,6 +287,7 @@ final class TodoListViewModel {
         todo.project = project
         todo.markDirty()
         try? todoRepository?.save()
+        notifySync()
         refresh()
     }
 
@@ -307,6 +320,18 @@ final class TodoListViewModel {
 
     func saveTodo() {
         try? todoRepository?.save()
+        notifySync()
+    }
+
+    // MARK: - Sync Integration
+
+    private func notifySync() {
+        syncEngine?.triggerSync()
+    }
+
+    private func saveAndSync() {
+        try? todoRepository?.save()
+        notifySync()
     }
 
     // MARK: - Project Actions

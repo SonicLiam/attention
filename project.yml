@@ -82,6 +82,10 @@ targets:
         group: Shared/Services
       - path: AttentionApp/Shared/ViewModels
         group: Shared/ViewModels
+      - path: AttentionApp/Shared/Network
+        group: Shared/Network
+      - path: AttentionApp/Shared/Sync
+        group: Shared/Sync
       - path: AttentionApp/watchOS
         group: watchOS
     settings:
