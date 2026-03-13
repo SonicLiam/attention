@@ -45,15 +45,15 @@
 **分支**: `phase/4-advanced`
 **目标**: 完善交互体验
 
-- [ ] Markdown 编辑器（笔记区域）
-- [ ] 全局 Quick Entry（macOS）
-- [ ] 拖拽排序（列表内 + 跨列表）
-- [ ] 批量选择和操作
-- [ ] 自然语言日期解析
-- [ ] 重复任务
-- [ ] 键盘快捷键（macOS 全套）
-- [ ] 搜索和筛选
-- [ ] 提醒通知（UserNotifications）
+- [x] Markdown 编辑器（笔记区域）
+- [x] 全局 Quick Entry（macOS）
+- [x] 拖拽排序（列表内 + 跨列表）
+- [x] 批量选择和操作
+- [x] 自然语言日期解析
+- [x] 重复任务
+- [x] 键盘快捷键（macOS 全套）
+- [x] 搜索和筛选
+- [x] 提醒通知（UserNotifications）
 - [ ] 精细动画打磨
 
 ### Phase 5: 同步服务 (Sync Server)
