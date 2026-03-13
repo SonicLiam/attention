@@ -9,6 +9,8 @@ struct QuickEntryView: View {
     @State private var selectedDate: Date = Date()
     @State private var hasDate = false
     @State private var selectedProject: Project?
+    @State private var detectedDate: Date?
+    @State private var detectedCleanTitle: String?
     @FocusState private var isTitleFocused: Bool
 
     var body: some View {
@@ -41,6 +43,42 @@ struct QuickEntryView: View {
                 .font(.title3)
                 .focused($isTitleFocused)
                 .onSubmit { createAndDismiss() }
+                .onChange(of: title) {
+                    if let result = NaturalDateParser.detectAndExtract(from: title) {
+                        detectedDate = result.date
+                        detectedCleanTitle = result.cleanedTitle
+                    } else {
+                        detectedDate = nil
+                        detectedCleanTitle = nil
+                    }
+                }
+
+            // Natural language date suggestion
+            if let detected = detectedDate {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .foregroundStyle(Color.attentionPrimary)
+                        .font(.caption)
+                    Text("Schedule for \(detected.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))?")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Button("Apply") {
+                        selectedDate = detected
+                        hasDate = true
+                        if let clean = detectedCleanTitle {
+                            title = clean
+                        }
+                        detectedDate = nil
+                        detectedCleanTitle = nil
+                    }
+                    .font(.caption)
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .tint(Color.attentionPrimary)
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
 
             Divider()
 

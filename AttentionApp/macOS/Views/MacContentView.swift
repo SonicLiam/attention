@@ -603,15 +603,7 @@ struct TodoDetailView: View {
 
                 // Notes (Markdown)
                 detailSection("Notes") {
-                    TextEditor(text: $notes)
-                        .font(.body)
-                        .frame(minHeight: 120)
-                        .scrollContentBackground(.hidden)
-                        .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: AttentionLayout.smallCornerRadius)
-                                .fill(.quaternary.opacity(0.5))
-                        )
+                    MarkdownEditorView(text: $notes)
                         .onChange(of: notes) {
                             todo.notes = notes
                             todo.markDirty()

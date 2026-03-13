@@ -105,6 +105,8 @@ struct iOSTodoListView: View {
     @State private var fabScale: CGFloat = 1.0
     @State private var showSchedulePicker = false
     @State private var todoToSchedule: Todo?
+    @State private var detectedDate: Date?
+    @State private var detectedCleanTitle: String?
 
     var body: some View {
         NavigationStack {
@@ -233,6 +235,37 @@ struct iOSTodoListView: View {
                 Section {
                     TextField("What do you want to do?", text: $newTodoTitle)
                         .font(.headline)
+                        .onChange(of: newTodoTitle) {
+                            if let result = NaturalDateParser.detectAndExtract(from: newTodoTitle) {
+                                detectedDate = result.date
+                                detectedCleanTitle = result.cleanedTitle
+                            } else {
+                                detectedDate = nil
+                                detectedCleanTitle = nil
+                            }
+                        }
+                }
+
+                if let detected = detectedDate {
+                    Section {
+                        HStack {
+                            Image(systemName: "sparkles")
+                                .foregroundStyle(Color.attentionPrimary)
+                            Text("Schedule for \(detected.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Button("Apply") {
+                                if let clean = detectedCleanTitle {
+                                    newTodoTitle = clean
+                                }
+                                detectedDate = nil
+                                detectedCleanTitle = nil
+                            }
+                            .font(.subheadline)
+                            .foregroundStyle(Color.attentionPrimary)
+                        }
+                    }
                 }
             }
             .navigationTitle("New To-Do")
@@ -241,13 +274,23 @@ struct iOSTodoListView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         newTodoTitle = ""
+                        detectedDate = nil
+                        detectedCleanTitle = nil
                         showNewTodo = false
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        viewModel.createTodo(title: newTodoTitle)
+                        let titleToUse = detectedCleanTitle ?? newTodoTitle
+                        let dateToUse = detectedDate
+                        if let dateToUse {
+                            viewModel.createTodoWithDetails(title: titleToUse, scheduledDate: dateToUse)
+                        } else {
+                            viewModel.createTodo(title: titleToUse)
+                        }
                         newTodoTitle = ""
+                        detectedDate = nil
+                        detectedCleanTitle = nil
                         showNewTodo = false
                         let generator = UINotificationFeedbackGenerator()
                         generator.notificationOccurred(.success)
@@ -622,8 +665,7 @@ struct iOSTodoDetailView: View {
 
             // Notes section
             Section("Notes") {
-                TextEditor(text: $notes)
-                    .frame(minHeight: 120)
+                MarkdownEditorView(text: $notes)
                     .onChange(of: notes) { hasChanges = true }
             }
         }
