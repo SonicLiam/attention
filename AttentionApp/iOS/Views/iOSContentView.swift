@@ -1,12 +1,10 @@
 import SwiftUI
 import SwiftData
 
-// MARK: - Main iOS Content View
-
 struct iOSContentView: View {
     @Environment(TodoListViewModel.self) private var viewModel
     @Environment(\.modelContext) private var modelContext
-    @State private var selectedTab: iOSTab = .inbox
+    @State private var selectedTab: SidebarItem = .inbox
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -22,11 +20,11 @@ struct iOSContentView: View {
                 iOSTodoListView(sidebarItem: .upcoming)
             }
 
-            Tab("Anytime", systemImage: "square.stack.fill", value: .anytime) {
-                iOSTodoListView(sidebarItem: .anytime)
+            Tab("Projects", systemImage: "list.bullet.clipboard", value: .anytime) {
+                iOSProjectsView()
             }
 
-            Tab("Browse", systemImage: "ellipsis.circle.fill", value: .browse) {
+            Tab("Browse", systemImage: "square.grid.2x2", value: .logbook) {
                 iOSBrowseView()
             }
         }
@@ -37,17 +35,7 @@ struct iOSContentView: View {
     }
 }
 
-// MARK: - iOS Tab Enum
-
-enum iOSTab: Hashable {
-    case inbox
-    case today
-    case upcoming
-    case anytime
-    case browse
-}
-
-// MARK: - Browse View (Someday, Logbook, Projects)
+// MARK: - Browse View (Someday / Logbook / Anytime)
 
 struct iOSBrowseView: View {
     @Environment(TodoListViewModel.self) private var viewModel
@@ -55,7 +43,18 @@ struct iOSBrowseView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Lists") {
+                Section {
+                    NavigationLink {
+                        iOSTodoListView(sidebarItem: .anytime)
+                    } label: {
+                        Label {
+                            Text("Anytime")
+                        } icon: {
+                            Image(systemName: "square.stack.fill")
+                                .foregroundStyle(Color.sidebarAnytime)
+                        }
+                    }
+
                     NavigationLink {
                         iOSTodoListView(sidebarItem: .someday)
                     } label: {
@@ -89,49 +88,23 @@ struct iOSBrowseView: View {
                         }
                     }
                 }
-
-                Section("Projects") {
-                    ForEach(viewModel.projects) { project in
-                        NavigationLink {
-                            iOSTodoListView(sidebarItem: .project(project))
-                        } label: {
-                            HStack {
-                                Image(systemName: "list.bullet")
-                                    .foregroundStyle(Color.attentionPrimary)
-
-                                Text(project.title)
-
-                                Spacer()
-
-                                if project.totalTodos > 0 {
-                                    CircularProgressView(progress: project.progress)
-                                        .frame(width: 24, height: 24)
-                                }
-                            }
-                        }
-                    }
-                }
             }
             .navigationTitle("Browse")
-            .onAppear {
-                viewModel.loadSidebarData()
-            }
         }
     }
 }
 
-// MARK: - iOS Todo List with Magic Plus FAB
+// MARK: - iOS Todo List
 
 struct iOSTodoListView: View {
     let sidebarItem: SidebarItem
     @Environment(TodoListViewModel.self) private var viewModel
     @State private var showNewTodo = false
     @State private var newTodoTitle = ""
+    @State private var showMagicPlusOptions = false
     @State private var fabScale: CGFloat = 1.0
-    @State private var showFABOptions = false
-    @State private var newTodoPriority: Priority = .none
-    @State private var newTodoScheduledDate: Date? = nil
     @State private var showSchedulePicker = false
+    @State private var todoToSchedule: Todo?
 
     var body: some View {
         NavigationStack {
@@ -141,7 +114,7 @@ struct iOSTodoListView: View {
                         NavigationLink(value: todo) {
                             iOSTodoRowView(todo: todo)
                         }
-                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                        .swipeActions(edge: .leading) {
                             Button {
                                 withAnimation(AttentionAnimation.springSnappy) {
                                     viewModel.completeTodo(todo)
@@ -149,11 +122,19 @@ struct iOSTodoListView: View {
                                 let generator = UINotificationFeedbackGenerator()
                                 generator.notificationOccurred(.success)
                             } label: {
-                                Label("Done", systemImage: "checkmark.circle.fill")
+                                Label("Done", systemImage: "checkmark")
                             }
                             .tint(Color.attentionSuccess)
                         }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        .swipeActions(edge: .trailing) {
+                            Button {
+                                todoToSchedule = todo
+                                showSchedulePicker = true
+                            } label: {
+                                Label("Schedule", systemImage: "calendar")
+                            }
+                            .tint(Color.sidebarUpcoming)
+
                             Button {
                                 viewModel.moveTodoToToday(todo)
                                 let generator = UIImpactFeedbackGenerator(style: .light)
@@ -163,57 +144,45 @@ struct iOSTodoListView: View {
                             }
                             .tint(Color.sidebarToday)
 
-                            Button {
-                                viewModel.scheduleFor(todo, date: Calendar.current.date(byAdding: .day, value: 1, to: Date())!)
-                                let generator = UIImpactFeedbackGenerator(style: .light)
-                                generator.impactOccurred()
-                            } label: {
-                                Label("Tomorrow", systemImage: "sunrise.fill")
-                            }
-                            .tint(Color.sidebarUpcoming)
-
                             Button(role: .destructive) {
-                                withAnimation(AttentionAnimation.springSnappy) {
-                                    viewModel.deleteTodo(todo)
-                                }
+                                viewModel.deleteTodo(todo)
                             } label: {
-                                Label("Delete", systemImage: "trash.fill")
+                                Label("Delete", systemImage: "trash")
                             }
                         }
                     }
                 }
                 .listStyle(.plain)
                 .navigationTitle(sidebarItem.title)
-                .navigationBarTitleDisplayMode(.large)
                 .navigationDestination(for: Todo.self) { todo in
                     iOSTodoDetailView(todo: todo)
                 }
-                .refreshable {
-                    viewModel.loadTodosForCurrentView()
+                .overlay {
+                    if viewModel.todos.isEmpty {
+                        ContentUnavailableView {
+                            Label(emptyTitle, systemImage: emptyIcon)
+                        } description: {
+                            Text(emptyDescription)
+                        }
+                    }
                 }
 
                 // Magic Plus FAB
-                magicPlusButton
+                magicPlusFAB
                     .padding(.trailing, 20)
                     .padding(.bottom, 20)
             }
             .sheet(isPresented: $showNewTodo) {
                 newTodoSheet
             }
-            .confirmationDialog("New...", isPresented: $showFABOptions) {
+            .sheet(isPresented: $showSchedulePicker) {
+                scheduleDatePicker
+            }
+            .confirmationDialog("New...", isPresented: $showMagicPlusOptions) {
                 Button("New To-Do") {
-                    newTodoPriority = .none
-                    newTodoScheduledDate = nil
                     showNewTodo = true
                 }
-                Button("New To-Do for Today") {
-                    newTodoPriority = .none
-                    newTodoScheduledDate = Calendar.current.startOfDay(for: Date())
-                    showNewTodo = true
-                }
-                Button("New To-Do (High Priority)") {
-                    newTodoPriority = .high
-                    newTodoScheduledDate = nil
+                Button("New To-Do in Inbox") {
                     showNewTodo = true
                 }
                 Button("Cancel", role: .cancel) {}
@@ -227,45 +196,33 @@ struct iOSTodoListView: View {
 
     // MARK: - Magic Plus FAB
 
-    private var magicPlusButton: some View {
+    private var magicPlusFAB: some View {
         Button {
             let generator = UIImpactFeedbackGenerator(style: .medium)
             generator.impactOccurred()
-            newTodoPriority = .none
-            newTodoScheduledDate = nil
             showNewTodo = true
         } label: {
             Image(systemName: "plus")
-                .font(.system(size: 22, weight: .semibold))
+                .font(.title2.weight(.semibold))
                 .foregroundStyle(.white)
                 .frame(width: 56, height: 56)
                 .background(
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.attentionPrimary, Color.attentionSecondary],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .shadow(color: Color.attentionPrimary.opacity(0.4), radius: 8, x: 0, y: 4)
+                        .fill(Color.attentionPrimary)
+                        .shadow(color: Color.attentionPrimary.opacity(0.4), radius: 8, y: 4)
                 )
         }
         .scaleEffect(fabScale)
+        .onLongPressGesture(minimumDuration: 0.4) {
+            let generator = UIImpactFeedbackGenerator(style: .heavy)
+            generator.impactOccurred()
+            showMagicPlusOptions = true
+        } onPressingChanged: { pressing in
+            withAnimation(AttentionAnimation.springSnappy) {
+                fabScale = pressing ? 0.85 : 1.0
+            }
+        }
         .animation(AttentionAnimation.springBouncy, value: fabScale)
-        .simultaneousGesture(
-            LongPressGesture(minimumDuration: 0.5)
-                .onChanged { _ in
-                    fabScale = 0.9
-                }
-                .onEnded { _ in
-                    fabScale = 1.0
-                    let generator = UIImpactFeedbackGenerator(style: .heavy)
-                    generator.impactOccurred()
-                    showFABOptions = true
-                }
-        )
-        .sensoryFeedback(.impact(flexibility: .solid), trigger: showNewTodo)
     }
 
     // MARK: - New Todo Sheet
@@ -276,24 +233,6 @@ struct iOSTodoListView: View {
                 Section {
                     TextField("What do you want to do?", text: $newTodoTitle)
                         .font(.headline)
-                }
-
-                Section {
-                    Picker("Priority", selection: $newTodoPriority) {
-                        ForEach(Priority.allCases, id: \.self) { priority in
-                            Label(priority.label, systemImage: priorityIcon(priority))
-                                .tag(priority)
-                        }
-                    }
-
-                    if let date = newTodoScheduledDate {
-                        HStack {
-                            Label("Scheduled", systemImage: "calendar")
-                            Spacer()
-                            Text(date.formatted(.dateTime.month(.abbreviated).day()))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
                 }
             }
             .navigationTitle("New To-Do")
@@ -309,8 +248,6 @@ struct iOSTodoListView: View {
                     Button("Add") {
                         viewModel.createTodo(title: newTodoTitle)
                         newTodoTitle = ""
-                        newTodoPriority = .none
-                        newTodoScheduledDate = nil
                         showNewTodo = false
                         let generator = UINotificationFeedbackGenerator()
                         generator.notificationOccurred(.success)
@@ -321,46 +258,142 @@ struct iOSTodoListView: View {
             }
         }
         .presentationDetents([.medium])
-        .presentationDragIndicator(.visible)
     }
 
-    private func priorityIcon(_ priority: Priority) -> String {
-        switch priority {
-        case .none: "minus"
-        case .low: "arrow.down"
-        case .medium: "equal"
-        case .high: "exclamationmark"
+    // MARK: - Schedule Date Picker
+
+    private var scheduleDatePicker: some View {
+        NavigationStack {
+            ScheduleDatePickerView(todo: todoToSchedule, viewModel: viewModel, isPresented: $showSchedulePicker)
+        }
+        .presentationDetents([.medium])
+    }
+
+    // MARK: - Empty State Helpers
+
+    private var emptyTitle: String {
+        switch sidebarItem {
+        case .inbox: return "Inbox is Empty"
+        case .today: return "Nothing for Today"
+        case .upcoming: return "Nothing Upcoming"
+        case .logbook: return "No Completed Tasks"
+        default: return "No Tasks"
+        }
+    }
+
+    private var emptyIcon: String {
+        switch sidebarItem {
+        case .inbox: return "tray"
+        case .today: return "star"
+        case .upcoming: return "calendar"
+        case .logbook: return "book"
+        default: return "checkmark.circle"
+        }
+    }
+
+    private var emptyDescription: String {
+        switch sidebarItem {
+        case .inbox: return "Tap + to add a new to-do."
+        case .today: return "Enjoy your day!"
+        case .upcoming: return "Schedule tasks for the future."
+        case .logbook: return "Completed tasks will appear here."
+        default: return "Nothing here yet."
         }
     }
 }
 
-// MARK: - iOS Todo Row (Enhanced)
+// MARK: - Schedule Date Picker View
+
+struct ScheduleDatePickerView: View {
+    let todo: Todo?
+    let viewModel: TodoListViewModel
+    @Binding var isPresented: Bool
+    @State private var selectedDate = Date()
+
+    var body: some View {
+        Form {
+            Section("Quick Options") {
+                Button {
+                    if let todo {
+                        viewModel.moveTodoToToday(todo)
+                    }
+                    isPresented = false
+                } label: {
+                    Label("Today", systemImage: "star.fill")
+                        .foregroundStyle(Color.sidebarToday)
+                }
+
+                Button {
+                    if let todo {
+                        let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
+                        viewModel.scheduleFor(todo, date: tomorrow)
+                    }
+                    isPresented = false
+                } label: {
+                    Label("Tomorrow", systemImage: "sunrise.fill")
+                        .foregroundStyle(.orange)
+                }
+
+                Button {
+                    if let todo {
+                        todo.moveToSomeday()
+                    }
+                    isPresented = false
+                } label: {
+                    Label("Someday", systemImage: "archivebox.fill")
+                        .foregroundStyle(Color.sidebarSomeday)
+                }
+            }
+
+            Section("Pick a Date") {
+                DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .tint(Color.attentionPrimary)
+
+                Button("Schedule") {
+                    if let todo {
+                        viewModel.scheduleFor(todo, date: selectedDate)
+                    }
+                    isPresented = false
+                }
+                .fontWeight(.semibold)
+                .foregroundStyle(Color.attentionPrimary)
+            }
+        }
+        .navigationTitle("Schedule")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { isPresented = false }
+            }
+        }
+    }
+}
+
+// MARK: - iOS Todo Row
 
 struct iOSTodoRowView: View {
     let todo: Todo
     @Environment(TodoListViewModel.self) private var viewModel
-    @State private var isChecked = false
+    @State private var checkboxAnimating = false
 
     var body: some View {
         HStack(spacing: 12) {
             // Tappable checkbox
             Button {
                 withAnimation(AttentionAnimation.springSnappy) {
-                    isChecked = true
+                    checkboxAnimating = true
+                    viewModel.completeTodo(todo)
                 }
                 let generator = UINotificationFeedbackGenerator()
                 generator.notificationOccurred(.success)
-                // Delay completion to show animation
-                DispatchQueue.main.asyncAfter(deadline: .now() + AttentionAnimation.completionDelay) {
-                    viewModel.completeTodo(todo)
-                }
             } label: {
                 ZStack {
                     Circle()
                         .strokeBorder(checkboxColor, lineWidth: 1.5)
                         .frame(width: AttentionLayout.checkboxSize, height: AttentionLayout.checkboxSize)
 
-                    if isChecked {
+                    if checkboxAnimating {
                         Circle()
                             .fill(checkboxColor)
                             .frame(width: AttentionLayout.checkboxSize, height: AttentionLayout.checkboxSize)
@@ -369,7 +402,7 @@ struct iOSTodoRowView: View {
                         Image(systemName: "checkmark")
                             .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(.white)
-                            .transition(.scale.combined(with: .opacity))
+                            .transition(.scale)
                     }
                 }
             }
@@ -378,24 +411,24 @@ struct iOSTodoRowView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text(todo.title)
                     .lineLimit(1)
-                    .strikethrough(isChecked)
-                    .foregroundStyle(isChecked ? .secondary : .primary)
 
                 HStack(spacing: 6) {
                     if let date = todo.scheduledDate {
-                        Label(
-                            date.formatted(.dateTime.month(.abbreviated).day()),
-                            systemImage: "calendar"
-                        )
+                        Label {
+                            Text(date.formatted(.dateTime.month(.abbreviated).day()))
+                        } icon: {
+                            Image(systemName: "calendar")
+                        }
                         .font(.caption)
                         .foregroundStyle(todo.isOverdue ? Color.attentionDanger : .secondary)
                     }
 
                     if let deadline = todo.deadline {
-                        Label(
-                            deadline.formatted(.dateTime.month(.abbreviated).day()),
-                            systemImage: "flag.fill"
-                        )
+                        Label {
+                            Text(deadline.formatted(.dateTime.month(.abbreviated).day()))
+                        } icon: {
+                            Image(systemName: "flag.fill")
+                        }
                         .font(.caption)
                         .foregroundStyle(todo.isOverdue ? Color.attentionDanger : Color.attentionWarning)
                     }
@@ -408,17 +441,13 @@ struct iOSTodoRowView: View {
 
                     if !todo.checklist.isEmpty {
                         let completed = todo.checklist.filter(\.isCompleted).count
-                        let total = todo.checklist.count
-                        Label("\(completed)/\(total)", systemImage: "checklist")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if let project = todo.project {
-                        Label(project.title, systemImage: "list.bullet")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                        Label {
+                            Text("\(completed)/\(todo.checklist.count)")
+                        } icon: {
+                            Image(systemName: "checklist")
+                        }
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -432,7 +461,6 @@ struct iOSTodoRowView: View {
             }
         }
         .padding(.vertical, 2)
-        .contentShape(Rectangle())
     }
 
     private var checkboxColor: Color {
@@ -454,7 +482,7 @@ struct iOSTodoRowView: View {
     }
 }
 
-// MARK: - iOS Todo Detail View (Full-Featured)
+// MARK: - iOS Todo Detail
 
 struct iOSTodoDetailView: View {
     let todo: Todo
@@ -463,13 +491,12 @@ struct iOSTodoDetailView: View {
     @State private var title: String = ""
     @State private var notes: String = ""
     @State private var priority: Priority = .none
-    @State private var scheduledDate: Date? = nil
-    @State private var deadline: Date? = nil
-    @State private var showScheduleDatePicker = false
-    @State private var showDeadlineDatePicker = false
-    @State private var tempScheduledDate = Date()
-    @State private var tempDeadlineDate = Date()
+    @State private var scheduledDate: Date?
+    @State private var hasScheduledDate = false
+    @State private var deadline: Date?
+    @State private var hasDeadline = false
     @State private var newChecklistTitle = ""
+    @State private var hasChanges = false
 
     var body: some View {
         Form {
@@ -477,83 +504,35 @@ struct iOSTodoDetailView: View {
             Section {
                 TextField("Title", text: $title)
                     .font(.headline)
+                    .onChange(of: title) { hasChanges = true }
             }
 
             // Schedule section
             Section("Schedule") {
-                // Scheduled date
-                HStack {
-                    Label("When", systemImage: "calendar")
-                    Spacer()
-                    if let date = scheduledDate {
-                        Text(date.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
-                            .foregroundStyle(Color.attentionPrimary)
-                    } else {
-                        Text("No date")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    tempScheduledDate = scheduledDate ?? Date()
-                    showScheduleDatePicker.toggle()
-                }
-
-                if showScheduleDatePicker {
+                Toggle("Scheduled Date", isOn: $hasScheduledDate.animation())
+                if hasScheduledDate {
                     DatePicker(
-                        "Scheduled Date",
-                        selection: $tempScheduledDate,
-                        displayedComponents: .date
+                        "Date",
+                        selection: Binding(
+                            get: { scheduledDate ?? Date() },
+                            set: { scheduledDate = $0; hasChanges = true }
+                        ),
+                        displayedComponents: [.date]
                     )
-                    .datePickerStyle(.graphical)
                     .tint(Color.attentionPrimary)
-                    .onChange(of: tempScheduledDate) { _, newVal in
-                        scheduledDate = newVal
-                    }
-
-                    Button("Clear Date", role: .destructive) {
-                        scheduledDate = nil
-                        showScheduleDatePicker = false
-                    }
-                    .font(.subheadline)
                 }
 
-                // Deadline
-                HStack {
-                    Label("Deadline", systemImage: "flag.fill")
-                        .foregroundStyle(deadline != nil ? Color.attentionWarning : .primary)
-                    Spacer()
-                    if let dl = deadline {
-                        Text(dl.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
-                            .foregroundStyle(Color.attentionWarning)
-                    } else {
-                        Text("None")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    tempDeadlineDate = deadline ?? Date()
-                    showDeadlineDatePicker.toggle()
-                }
-
-                if showDeadlineDatePicker {
+                Toggle("Deadline", isOn: $hasDeadline.animation())
+                if hasDeadline {
                     DatePicker(
                         "Deadline",
-                        selection: $tempDeadlineDate,
-                        displayedComponents: .date
+                        selection: Binding(
+                            get: { deadline ?? Date() },
+                            set: { deadline = $0; hasChanges = true }
+                        ),
+                        displayedComponents: [.date, .hourAndMinute]
                     )
-                    .datePickerStyle(.graphical)
-                    .tint(Color.attentionWarning)
-                    .onChange(of: tempDeadlineDate) { _, newVal in
-                        deadline = newVal
-                    }
-
-                    Button("Clear Deadline", role: .destructive) {
-                        deadline = nil
-                        showDeadlineDatePicker = false
-                    }
-                    .font(.subheadline)
+                    .tint(Color.attentionDanger)
                 }
             }
 
@@ -561,16 +540,18 @@ struct iOSTodoDetailView: View {
             Section("Priority") {
                 Picker("Priority", selection: $priority) {
                     ForEach(Priority.allCases, id: \.self) { p in
-                        HStack {
-                            Circle()
-                                .fill(priorityPickerColor(p))
-                                .frame(width: 8, height: 8)
+                        Label {
                             Text(p.label)
+                        } icon: {
+                            Image(systemName: priorityIcon(for: p))
+                                .foregroundStyle(priorityPickerColor(for: p))
                         }
                         .tag(p)
                     }
                 }
-                .pickerStyle(.segmented)
+                .pickerStyle(.inline)
+                .labelsHidden()
+                .onChange(of: priority) { hasChanges = true }
             }
 
             // Tags section
@@ -579,19 +560,18 @@ struct iOSTodoDetailView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             ForEach(todo.tags) { tag in
-                                TagChipView(tag: tag)
+                                Text(tag.title)
+                                    .font(.caption.weight(.medium))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule()
+                                            .fill(Color(hex: tag.color).opacity(0.15))
+                                    )
+                                    .foregroundStyle(Color(hex: tag.color))
                             }
                         }
-                        .padding(.vertical, 4)
                     }
-                }
-            }
-
-            // Project
-            if let project = todo.project {
-                Section("Project") {
-                    Label(project.title, systemImage: "list.bullet")
-                        .foregroundStyle(Color.attentionPrimary)
                 }
             }
 
@@ -603,12 +583,12 @@ struct iOSTodoDetailView: View {
                             withAnimation(AttentionAnimation.springSnappy) {
                                 item.toggle()
                             }
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
+                            let generator = UISelectionFeedbackGenerator()
+                            generator.selectionChanged()
                         } label: {
                             Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                                 .foregroundStyle(item.isCompleted ? Color.attentionSuccess : .secondary)
-                                .font(.system(size: 20))
+                                .font(.title3)
                         }
                         .buttonStyle(.plain)
 
@@ -621,10 +601,22 @@ struct iOSTodoDetailView: View {
                 HStack {
                     Image(systemName: "plus.circle")
                         .foregroundStyle(Color.attentionPrimary)
-                    TextField("Add item...", text: $newChecklistTitle)
+                    TextField("Add item", text: $newChecklistTitle)
                         .onSubmit {
                             addChecklistItem()
                         }
+                }
+            }
+
+            // Project assignment
+            if let project = todo.project {
+                Section("Project") {
+                    Label {
+                        Text(project.title)
+                    } icon: {
+                        Image(systemName: "list.bullet.clipboard")
+                            .foregroundStyle(Color.attentionPrimary)
+                    }
                 }
             }
 
@@ -632,19 +624,22 @@ struct iOSTodoDetailView: View {
             Section("Notes") {
                 TextEditor(text: $notes)
                     .frame(minHeight: 120)
+                    .onChange(of: notes) { hasChanges = true }
             }
         }
         .navigationTitle("Details")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
-                    saveChanges()
-                    let generator = UINotificationFeedbackGenerator()
-                    generator.notificationOccurred(.success)
-                    dismiss()
+                if hasChanges {
+                    Button("Save") {
+                        saveChanges()
+                        let generator = UINotificationFeedbackGenerator()
+                        generator.notificationOccurred(.success)
+                    }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color.attentionPrimary)
                 }
-                .fontWeight(.semibold)
             }
         }
         .onAppear {
@@ -652,7 +647,10 @@ struct iOSTodoDetailView: View {
             notes = todo.notes
             priority = todo.priority
             scheduledDate = todo.scheduledDate
+            hasScheduledDate = todo.scheduledDate != nil
             deadline = todo.deadline
+            hasDeadline = todo.deadline != nil
+            hasChanges = false
         }
     }
 
@@ -660,12 +658,10 @@ struct iOSTodoDetailView: View {
         todo.title = title
         todo.notes = notes
         todo.priority = priority
-        todo.scheduledDate = scheduledDate
-        todo.deadline = deadline
-        if scheduledDate != nil && todo.status == .inbox {
-            todo.status = .active
-        }
+        todo.scheduledDate = hasScheduledDate ? (scheduledDate ?? Date()) : nil
+        todo.deadline = hasDeadline ? (deadline ?? Date()) : nil
         todo.markDirty()
+        hasChanges = false
     }
 
     private func addChecklistItem() {
@@ -675,81 +671,82 @@ struct iOSTodoDetailView: View {
         todo.checklist.append(item)
         todo.markDirty()
         newChecklistTitle = ""
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
     }
 
-    private func priorityPickerColor(_ priority: Priority) -> Color {
+    private func priorityIcon(for priority: Priority) -> String {
         switch priority {
-        case .none: .gray
-        case .low: .blue
-        case .medium: .orange
-        case .high: Color.attentionDanger
+        case .none: return "circle"
+        case .low: return "arrow.down.circle"
+        case .medium: return "minus.circle"
+        case .high: return "exclamationmark.circle.fill"
+        }
+    }
+
+    private func priorityPickerColor(for priority: Priority) -> Color {
+        switch priority {
+        case .none: return .secondary
+        case .low: return .blue
+        case .medium: return .orange
+        case .high: return Color.attentionDanger
         }
     }
 }
 
-// MARK: - Tag Chip View
-
-struct TagChipView: View {
-    let tag: Tag
-
-    var body: some View {
-        Text(tag.title)
-            .font(.caption)
-            .fontWeight(.medium)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(
-                Capsule()
-                    .fill(Color(hex: tag.color).opacity(0.15))
-            )
-            .overlay(
-                Capsule()
-                    .strokeBorder(Color(hex: tag.color).opacity(0.3), lineWidth: 1)
-            )
-            .foregroundStyle(Color(hex: tag.color))
-    }
-}
-
-// MARK: - iOS Projects View (Enhanced)
+// MARK: - iOS Projects View
 
 struct iOSProjectsView: View {
     @Environment(TodoListViewModel.self) private var viewModel
     @State private var showCreateProject = false
     @State private var newProjectTitle = ""
 
-    private var projectsByArea: [(area: Area?, projects: [Project])] {
-        var grouped: [UUID?: [Project]] = [:]
+    // Group projects by area
+    private var groupedProjects: [(area: Area?, projects: [Project])] {
+        var groups: [(area: Area?, projects: [Project])] = []
+
+        // Projects with areas
+        var areaMap: [UUID: (area: Area, projects: [Project])] = [:]
+        var noAreaProjects: [Project] = []
+
         for project in viewModel.projects {
-            let key = project.area?.id
-            grouped[key, default: []].append(project)
-        }
-
-        var result: [(area: Area?, projects: [Project])] = []
-
-        // No-area projects first
-        if let noArea = grouped[nil] {
-            result.append((area: nil, projects: noArea))
-        }
-
-        // Area-grouped projects
-        for (key, projects) in grouped where key != nil {
-            if let area = projects.first?.area {
-                result.append((area: area, projects: projects))
+            if let area = project.area {
+                if areaMap[area.id] != nil {
+                    areaMap[area.id]!.projects.append(project)
+                } else {
+                    areaMap[area.id] = (area: area, projects: [project])
+                }
+            } else {
+                noAreaProjects.append(project)
             }
         }
 
-        return result
+        // Add no-area projects first
+        if !noAreaProjects.isEmpty {
+            groups.append((area: nil, projects: noAreaProjects))
+        }
+
+        // Add area-grouped projects
+        for (_, value) in areaMap.sorted(by: { $0.value.area.sortOrder < $1.value.area.sortOrder }) {
+            groups.append((area: value.area, projects: value.projects))
+        }
+
+        return groups
     }
 
     var body: some View {
         NavigationStack {
             List {
-                ForEach(projectsByArea, id: \.area?.id) { group in
-                    Section(group.area?.title ?? "No Area") {
+                ForEach(Array(groupedProjects.enumerated()), id: \.offset) { _, group in
+                    Section {
                         ForEach(group.projects) { project in
                             NavigationLink(value: project) {
-                                ProjectRowView(project: project)
+                                projectRow(project)
                             }
+                        }
+                    } header: {
+                        if let area = group.area {
+                            Label(area.title, systemImage: "folder.fill")
                         }
                     }
                 }
@@ -757,6 +754,15 @@ struct iOSProjectsView: View {
             .navigationTitle("Projects")
             .navigationDestination(for: Project.self) { project in
                 iOSTodoListView(sidebarItem: .project(project))
+            }
+            .overlay {
+                if viewModel.projects.isEmpty {
+                    ContentUnavailableView {
+                        Label("No Projects", systemImage: "list.bullet.clipboard")
+                    } description: {
+                        Text("Create a project to organize related to-dos.")
+                    }
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -771,10 +777,54 @@ struct iOSProjectsView: View {
             .sheet(isPresented: $showCreateProject) {
                 createProjectSheet
             }
-            .onAppear {
-                viewModel.loadSidebarData()
+        }
+    }
+
+    private func projectRow(_ project: Project) -> some View {
+        HStack(spacing: 14) {
+            // Progress ring
+            ZStack {
+                Circle()
+                    .stroke(Color.attentionPrimary.opacity(0.15), lineWidth: 3)
+
+                Circle()
+                    .trim(from: 0, to: project.progress)
+                    .stroke(Color.attentionPrimary, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .animation(AttentionAnimation.springDefault, value: project.progress)
+
+                if project.totalTodos > 0 {
+                    Text("\(Int(project.progress * 100))%")
+                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.attentionPrimary)
+                }
+            }
+            .frame(width: 36, height: 36)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(project.title)
+                    .font(.headline)
+
+                if project.totalTodos > 0 {
+                    Text("\(project.completedTodos)/\(project.totalTodos) completed")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("No tasks yet")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+
+            if let deadline = project.deadline {
+                Text(deadline.formatted(.dateTime.month(.abbreviated).day()))
+                    .font(.caption)
+                    .foregroundStyle(Color.attentionWarning)
             }
         }
+        .padding(.vertical, 4)
     }
 
     private var createProjectSheet: some View {
@@ -808,87 +858,10 @@ struct iOSProjectsView: View {
             }
         }
         .presentationDetents([.medium])
-        .presentationDragIndicator(.visible)
     }
 }
 
-// MARK: - Project Row with Progress Ring
-
-struct ProjectRowView: View {
-    let project: Project
-    @State private var animatedProgress: Double = 0
-
-    var body: some View {
-        HStack(spacing: 12) {
-            // Progress ring
-            ZStack {
-                Circle()
-                    .stroke(.quaternary, lineWidth: 3)
-
-                Circle()
-                    .trim(from: 0, to: animatedProgress)
-                    .stroke(
-                        LinearGradient(
-                            colors: [Color.attentionPrimary, Color.attentionSecondary],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 3, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-
-                if project.totalTodos > 0 {
-                    Text("\(Int(project.progress * 100))%")
-                        .font(.system(size: 9, weight: .semibold))
-                        .monospacedDigit()
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .frame(width: 36, height: 36)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(project.title)
-                    .font(.headline)
-
-                HStack(spacing: 4) {
-                    if project.totalTodos > 0 {
-                        Text("\(project.completedTodos)/\(project.totalTodos) completed")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        Text("No to-dos")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if let area = project.area {
-                        Text("  \(area.title)")
-                            .font(.caption)
-                            .foregroundStyle(Color.attentionPrimary)
-                    }
-                }
-            }
-
-            Spacer()
-
-            if let deadline = project.deadline {
-                VStack {
-                    Text(deadline.formatted(.dateTime.month(.abbreviated).day()))
-                        .font(.caption2)
-                        .foregroundStyle(Color.attentionWarning)
-                }
-            }
-        }
-        .padding(.vertical, 4)
-        .onAppear {
-            withAnimation(AttentionAnimation.springDefault.delay(0.1)) {
-                animatedProgress = project.progress
-            }
-        }
-    }
-}
-
-// MARK: - Circular Progress View (Polished)
+// MARK: - Circular Progress
 
 struct CircularProgressView: View {
     let progress: Double

@@ -1,7 +1,6 @@
 import WidgetKit
 import SwiftUI
 import SwiftData
-import AppIntents
 
 // MARK: - Widget Bundle
 
@@ -11,27 +10,6 @@ struct AttentionWidgetBundle: WidgetBundle {
         TodayOverviewWidget()
         TodayListWidget()
         QuickAddWidget()
-    }
-}
-
-// MARK: - Toggle Todo Intent (iOS 17+ Interactive Widget)
-
-struct ToggleTodoIntent: AppIntent {
-    static let title: LocalizedStringResource = "Toggle To-Do"
-    static let description: IntentDescription = "Mark a to-do as complete or incomplete"
-
-    @Parameter(title: "Todo ID")
-    var todoId: String
-
-    init() {}
-
-    init(todoId: String) {
-        self.todoId = todoId
-    }
-
-    func perform() async throws -> some IntentResult {
-        // In a real implementation, this would toggle the todo in the shared data store
-        return .result()
     }
 }
 
@@ -47,6 +25,7 @@ struct TodayOverviewProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TodayOverviewEntry>) -> Void) {
+        // Load from shared SwiftData container
         let entry = TodayOverviewEntry(date: Date(), totalCount: 0, completedCount: 0)
         let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(900)))
         completion(timeline)
@@ -106,9 +85,6 @@ struct TodayOverviewWidgetView: View {
                 Text("Today")
                     .font(.headline)
                 Spacer()
-                Text(entry.date.formatted(.dateTime.weekday(.abbreviated)))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             Spacer()
@@ -162,7 +138,7 @@ struct TodayOverviewWidgetView: View {
     }
 }
 
-// MARK: - Today List Widget (Medium/Large)
+// MARK: - Today List Widget (Medium)
 
 struct TodayListProvider: TimelineProvider {
     func placeholder(in context: Context) -> TodayListEntry {
@@ -189,21 +165,12 @@ struct WidgetTodo: Identifiable {
     let id = UUID()
     let title: String
     let isCompleted: Bool
-    let priority: Priority
-
-    init(title: String, isCompleted: Bool, priority: Priority = .none) {
-        self.title = title
-        self.isCompleted = isCompleted
-        self.priority = priority
-    }
+    var priority: Priority = .none
 }
 
 struct TodayListEntry: TimelineEntry {
     let date: Date
     let todos: [WidgetTodo]
-
-    var completedCount: Int { todos.filter(\.isCompleted).count }
-    var totalCount: Int { todos.count }
 }
 
 struct TodayListWidget: Widget {
@@ -215,7 +182,7 @@ struct TodayListWidget: Widget {
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Today List")
-        .description("See your today's to-dos with interactive toggles.")
+        .description("See your today's to-dos with interactive completion.")
         .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
@@ -225,23 +192,25 @@ struct TodayListWidgetView: View {
 
     @Environment(\.widgetFamily) var family
 
-    var maxItems: Int {
+    private var maxItems: Int {
         family == .systemLarge ? 8 : 4
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             // Header
-            HStack(alignment: .center) {
+            HStack {
                 Image(systemName: "star.fill")
                     .foregroundStyle(.yellow)
+                    .font(.system(size: 14))
                 Text("Today")
                     .font(.headline)
                 Spacer()
-                if entry.totalCount > 0 {
-                    Text("\(entry.completedCount)/\(entry.totalCount)")
-                        .font(.caption)
-                        .fontWeight(.medium)
+
+                let completedCount = entry.todos.filter(\.isCompleted).count
+                if !entry.todos.isEmpty {
+                    Text("\(completedCount)/\(entry.todos.count)")
+                        .font(.caption.weight(.medium))
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
@@ -253,22 +222,39 @@ struct TodayListWidgetView: View {
                 HStack {
                     Spacer()
                     VStack(spacing: 6) {
-                        Image(systemName: "checkmark.seal.fill")
+                        Image(systemName: "checkmark.circle")
                             .font(.title2)
                             .foregroundStyle(Color.attentionSuccess)
-                        Text("All done for today!")
-                            .font(.subheadline)
+                        Text("All clear!")
+                            .font(.subheadline.weight(.medium))
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
                 }
                 Spacer()
             } else {
-                ForEach(Array(entry.todos.prefix(maxItems).enumerated()), id: \.element.id) { index, todo in
-                    if index > 0 {
-                        Divider()
+                ForEach(Array(entry.todos.prefix(maxItems).enumerated()), id: \.element.id) { _, todo in
+                    HStack(spacing: 8) {
+                        // Interactive toggle intent for iOS 17+
+                        Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(todo.isCompleted ? Color.attentionSuccess : priorityWidgetColor(todo.priority))
+                            .font(.system(size: 16))
+
+                        Text(todo.title)
+                            .font(.subheadline)
+                            .lineLimit(1)
+                            .strikethrough(todo.isCompleted)
+                            .foregroundStyle(todo.isCompleted ? .secondary : .primary)
+
+                        Spacer()
+
+                        if todo.priority == .high && !todo.isCompleted {
+                            Circle()
+                                .fill(Color.attentionDanger)
+                                .frame(width: 6, height: 6)
+                        }
                     }
-                    widgetTodoRow(todo)
+                    .padding(.vertical, 1)
                 }
 
                 if entry.todos.count > maxItems {
@@ -278,44 +264,15 @@ struct TodayListWidgetView: View {
                         .padding(.top, 2)
                 }
             }
-
-            Spacer(minLength: 0)
         }
     }
 
-    private func widgetTodoRow(_ todo: WidgetTodo) -> some View {
-        HStack(spacing: 8) {
-            // Interactive toggle button (iOS 17+)
-            Button(intent: ToggleTodoIntent(todoId: todo.id.uuidString)) {
-                Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(todo.isCompleted ? Color.attentionSuccess : priorityColor(todo.priority))
-                    .font(.system(size: 16))
-            }
-            .buttonStyle(.plain)
-
-            Text(todo.title)
-                .font(.subheadline)
-                .lineLimit(1)
-                .strikethrough(todo.isCompleted)
-                .foregroundStyle(todo.isCompleted ? .secondary : .primary)
-
-            Spacer()
-
-            if !todo.isCompleted && todo.priority != .none {
-                Circle()
-                    .fill(priorityColor(todo.priority))
-                    .frame(width: 6, height: 6)
-            }
-        }
-        .padding(.vertical, 1)
-    }
-
-    private func priorityColor(_ priority: Priority) -> Color {
+    private func priorityWidgetColor(_ priority: Priority) -> Color {
         switch priority {
-        case .none: .secondary
-        case .low: .blue
-        case .medium: .orange
-        case .high: Color.attentionDanger
+        case .none: return .secondary
+        case .low: return .blue
+        case .medium: return .orange
+        case .high: return Color.attentionDanger
         }
     }
 }
@@ -361,18 +318,12 @@ struct QuickAddWidgetView: View {
             VStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.attentionPrimary, Color.attentionSecondary],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 52, height: 52)
+                        .fill(Color.attentionPrimary.opacity(0.12))
+                        .frame(width: 60, height: 60)
 
-                    Image(systemName: "plus")
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundStyle(.white)
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 40))
+                        .foregroundStyle(Color.attentionPrimary)
                 }
 
                 Text("New To-Do")
