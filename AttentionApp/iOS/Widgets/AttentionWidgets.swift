@@ -1,6 +1,7 @@
 import WidgetKit
 import SwiftUI
 import SwiftData
+import AppIntents
 
 // MARK: - Widget Bundle
 
@@ -10,6 +11,27 @@ struct AttentionWidgetBundle: WidgetBundle {
         TodayOverviewWidget()
         TodayListWidget()
         QuickAddWidget()
+    }
+}
+
+// MARK: - Toggle Todo Intent (iOS 17+ Interactive Widget)
+
+struct ToggleTodoIntent: AppIntent {
+    static let title: LocalizedStringResource = "Toggle To-Do"
+    static let description: IntentDescription = "Mark a to-do as complete or incomplete"
+
+    @Parameter(title: "Todo ID")
+    var todoId: String
+
+    init() {}
+
+    init(todoId: String) {
+        self.todoId = todoId
+    }
+
+    func perform() async throws -> some IntentResult {
+        // In a real implementation, this would toggle the todo in the shared data store
+        return .result()
     }
 }
 
@@ -25,7 +47,6 @@ struct TodayOverviewProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<TodayOverviewEntry>) -> Void) {
-        // Load from shared SwiftData container
         let entry = TodayOverviewEntry(date: Date(), totalCount: 0, completedCount: 0)
         let timeline = Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(900)))
         completion(timeline)
@@ -84,6 +105,10 @@ struct TodayOverviewWidgetView: View {
                     .foregroundStyle(.yellow)
                 Text("Today")
                     .font(.headline)
+                Spacer()
+                Text(entry.date.formatted(.dateTime.weekday(.abbreviated)))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
@@ -94,7 +119,7 @@ struct TodayOverviewWidgetView: View {
                 Circle()
                     .trim(from: 0, to: entry.progress)
                     .stroke(
-                        ColorColor.attentionPrimary,
+                        Color.attentionPrimary,
                         style: StrokeStyle(lineWidth: 6, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
@@ -137,14 +162,15 @@ struct TodayOverviewWidgetView: View {
     }
 }
 
-// MARK: - Today List Widget (Medium)
+// MARK: - Today List Widget (Medium/Large)
 
 struct TodayListProvider: TimelineProvider {
     func placeholder(in context: Context) -> TodayListEntry {
         TodayListEntry(date: Date(), todos: [
-            WidgetTodo(title: "Review design specs", isCompleted: false),
-            WidgetTodo(title: "Team standup", isCompleted: true),
-            WidgetTodo(title: "Write documentation", isCompleted: false),
+            WidgetTodo(title: "Review design specs", isCompleted: false, priority: .medium),
+            WidgetTodo(title: "Team standup", isCompleted: true, priority: .none),
+            WidgetTodo(title: "Write documentation", isCompleted: false, priority: .high),
+            WidgetTodo(title: "Code review", isCompleted: false, priority: .low),
         ])
     }
 
@@ -163,11 +189,21 @@ struct WidgetTodo: Identifiable {
     let id = UUID()
     let title: String
     let isCompleted: Bool
+    let priority: Priority
+
+    init(title: String, isCompleted: Bool, priority: Priority = .none) {
+        self.title = title
+        self.isCompleted = isCompleted
+        self.priority = priority
+    }
 }
 
 struct TodayListEntry: TimelineEntry {
     let date: Date
     let todos: [WidgetTodo]
+
+    var completedCount: Int { todos.filter(\.isCompleted).count }
+    var totalCount: Int { todos.count }
 }
 
 struct TodayListWidget: Widget {
@@ -179,7 +215,7 @@ struct TodayListWidget: Widget {
                 .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("Today List")
-        .description("See your today's to-dos.")
+        .description("See your today's to-dos with interactive toggles.")
         .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
@@ -187,49 +223,99 @@ struct TodayListWidget: Widget {
 struct TodayListWidgetView: View {
     let entry: TodayListEntry
 
+    @Environment(\.widgetFamily) var family
+
+    var maxItems: Int {
+        family == .systemLarge ? 8 : 4
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
+        VStack(alignment: .leading, spacing: 4) {
+            // Header
+            HStack(alignment: .center) {
                 Image(systemName: "star.fill")
                     .foregroundStyle(.yellow)
                 Text("Today")
                     .font(.headline)
                 Spacer()
-                Text("\(entry.todos.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if entry.totalCount > 0 {
+                    Text("\(entry.completedCount)/\(entry.totalCount)")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
             }
+            .padding(.bottom, 2)
 
             if entry.todos.isEmpty {
                 Spacer()
                 HStack {
                     Spacer()
-                    VStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle")
+                    VStack(spacing: 6) {
+                        Image(systemName: "checkmark.seal.fill")
                             .font(.title2)
-                            .foregroundStyle(.green)
-                        Text("All clear!")
-                            .font(.caption)
+                            .foregroundStyle(Color.attentionSuccess)
+                        Text("All done for today!")
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
                     Spacer()
                 }
                 Spacer()
             } else {
-                ForEach(entry.todos.prefix(5)) { todo in
-                    HStack(spacing: 8) {
-                        Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(todo.isCompleted ? .green : .secondary)
-                            .font(.system(size: 14))
-
-                        Text(todo.title)
-                            .font(.subheadline)
-                            .lineLimit(1)
-                            .strikethrough(todo.isCompleted)
-                            .foregroundStyle(todo.isCompleted ? .secondary : .primary)
+                ForEach(Array(entry.todos.prefix(maxItems).enumerated()), id: \.element.id) { index, todo in
+                    if index > 0 {
+                        Divider()
                     }
+                    widgetTodoRow(todo)
+                }
+
+                if entry.todos.count > maxItems {
+                    Text("+\(entry.todos.count - maxItems) more")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 2)
                 }
             }
+
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func widgetTodoRow(_ todo: WidgetTodo) -> some View {
+        HStack(spacing: 8) {
+            // Interactive toggle button (iOS 17+)
+            Button(intent: ToggleTodoIntent(todoId: todo.id.uuidString)) {
+                Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(todo.isCompleted ? Color.attentionSuccess : priorityColor(todo.priority))
+                    .font(.system(size: 16))
+            }
+            .buttonStyle(.plain)
+
+            Text(todo.title)
+                .font(.subheadline)
+                .lineLimit(1)
+                .strikethrough(todo.isCompleted)
+                .foregroundStyle(todo.isCompleted ? .secondary : .primary)
+
+            Spacer()
+
+            if !todo.isCompleted && todo.priority != .none {
+                Circle()
+                    .fill(priorityColor(todo.priority))
+                    .frame(width: 6, height: 6)
+            }
+        }
+        .padding(.vertical, 1)
+    }
+
+    private func priorityColor(_ priority: Priority) -> Color {
+        switch priority {
+        case .none: .secondary
+        case .low: .blue
+        case .medium: .orange
+        case .high: Color.attentionDanger
         }
     }
 }
@@ -273,9 +359,21 @@ struct QuickAddWidgetView: View {
     var body: some View {
         Link(destination: URL(string: "attention://new")!) {
             VStack(spacing: 12) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(Color.attentionPrimary)
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.attentionPrimary, Color.attentionSecondary],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 52, height: 52)
+
+                    Image(systemName: "plus")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
 
                 Text("New To-Do")
                     .font(.headline)
