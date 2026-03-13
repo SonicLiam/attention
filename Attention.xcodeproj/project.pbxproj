@@ -12,33 +12,25 @@
 		0EC763146872377A6C38815A /* WatchContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C738DF953C3DDE38C6DCB103 /* WatchContentView.swift */; };
 		15B4B323E1BC4CA9D39AA111 /* Area.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16248BCA7FD82AAB8D67212 /* Area.swift */; };
 		185F2D017C4A2709A6F170C4 /* AttentionTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */; };
-		18DA97BCA39D56E6BCD3F388 /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC1525DB413D08BD00F6189 /* MarkdownRenderer.swift */; };
 		1C12F268444B0B2F16FA4A0F /* AttentionTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */; };
 		1DACABB60EE03D1F0F6701EC /* ChecklistItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */; };
 		2124445E1C63F370590E3704 /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
-		2298BD3FE631AB5EF711B86F /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC1525DB413D08BD00F6189 /* MarkdownRenderer.swift */; };
-		238E65AAC0B5D584E2EB45BA /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC1525DB413D08BD00F6189 /* MarkdownRenderer.swift */; };
-		2DD7ED66DC2CB7B3FB69D93F /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466B156FF0B01182BC5178FF /* SearchViewModel.swift */; };
 		2ED8DB05B0A97CFFA825B2B4 /* DataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153463757B3F29F8CCDF9367 /* DataContainer.swift */; };
 		319139791CD7FF3EDBF23F51 /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
 		3CF7A295AA041D5A8FE65962 /* ProjectRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */; };
 		3F538F4F82F880AD83363809 /* MacContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 424FF2F8806530F62F0E4CAC /* MacContentView.swift */; };
 		433650D565E962E91C2141EB /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C99CD8B66AA3F1F179A6E1 /* Tag.swift */; };
-		474D328ED8FFB80C3009A97F /* iOSSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F91A7BA41A56E35FE145FAD /* iOSSearchView.swift */; };
 		4DB9C0115852FBD1DE97ADA9 /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
+		56716B834A978F03A87F59BA /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A998B8740E9CA0A929D738D /* NotificationService.swift */; };
 		57B5162654B2C314AF8A511F /* Area.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16248BCA7FD82AAB8D67212 /* Area.swift */; };
-		58CD5EE5D0DF8CBFDEB41296 /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC1525DB413D08BD00F6189 /* MarkdownRenderer.swift */; };
 		59BDE3A4524A05A874F5EA24 /* QuickEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8015D152602F062EB815D6 /* QuickEntryView.swift */; };
-		5A9640E7DDA193C896A26AB5 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466B156FF0B01182BC5178FF /* SearchViewModel.swift */; };
 		5CCE3D620683BCFE7625B3EA /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
 		682FBFE979DCC8B55D66A7EF /* AttentionTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */; };
 		685D83ED5152FC19E4F87B2A /* TodoListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */; };
-		6938ADC42BE814C6B694E9AA /* NaturalDateParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFF65102A9764F0E106D3EB /* NaturalDateParser.swift */; };
 		72982A7DF0E7684EC11AA217 /* TodoListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */; };
+		77537F1447422C0E52EA6C53 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A998B8740E9CA0A929D738D /* NotificationService.swift */; };
 		7A20121D36A757D70B028623 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A89F1EFEC20541BDA232FF0 /* Project.swift */; };
-		7F4D1932D2EA441B8309E65D /* NaturalDateParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFF65102A9764F0E106D3EB /* NaturalDateParser.swift */; };
 		8069AA7FA8DCCB5A49D25428 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A89F1EFEC20541BDA232FF0 /* Project.swift */; };
-		90D3046980FEF761D95C9AE2 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A66F384240BDC15D7576A9E /* SearchView.swift */; };
 		94EF9C14DD36F90D6472059C /* Todo.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD47A4615574749DDDFA6BC3 /* Todo.swift */; };
 		970F17EB4A3717B00CA41969 /* DataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153463757B3F29F8CCDF9367 /* DataContainer.swift */; };
 		A4442D18F7B59DFA7040D098 /* AttentionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4DD0E4E935FCFECDC056F5 /* AttentionApp.swift */; };
@@ -53,17 +45,16 @@
 		B887896AD243BE7355C6AF15 /* WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA7B0208A1E934BA7FEEB54 /* WatchApp.swift */; };
 		BC5481285FA62247A7A6D6C5 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C99CD8B66AA3F1F179A6E1 /* Tag.swift */; };
 		BD6BC7CE633BE03444EDEDBF /* TodoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */; };
-		BD88BC9615E0A1D1F57DF438 /* NaturalDateParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BFF65102A9764F0E106D3EB /* NaturalDateParser.swift */; };
 		BDF1BD059C5832F9D06047D1 /* ChecklistItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */; };
 		C65973AA598C34839A88433C /* AttentionWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9C6D0588687069974DC35F6 /* AttentionWidgets.swift */; };
 		CC4D692FAFA565FA684A22EB /* DataContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153463757B3F29F8CCDF9367 /* DataContainer.swift */; };
 		D6AFB4DE467D98D2A4D9D4D6 /* Area.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16248BCA7FD82AAB8D67212 /* Area.swift */; };
 		D9D256A4F75E223059656357 /* ProjectRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */; };
-		DFEDE579BCB48AFDB1C1BF6C /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 466B156FF0B01182BC5178FF /* SearchViewModel.swift */; };
 		E188AF19FBF18B4B14883A64 /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A89F1EFEC20541BDA232FF0 /* Project.swift */; };
 		E7728E545180A9B5FE2768EF /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A89F1EFEC20541BDA232FF0 /* Project.swift */; };
 		E7BDA90A353A2B75C670FC0B /* iOSContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29E030676A3D6F3E33169375 /* iOSContentView.swift */; };
 		EB5A97C1883110CE8E6B4B38 /* TodoRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */; };
+		F3D95E0F145BF2233B1E22DA /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A998B8740E9CA0A929D738D /* NotificationService.swift */; };
 		F45160F1A921FCC51D221669 /* AttentionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4DD0E4E935FCFECDC056F5 /* AttentionApp.swift */; };
 		F5834C3F089D8061D8580428 /* ProjectRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */; };
 		F6DE98314B3EB3F1EAD194EA /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C99CD8B66AA3F1F179A6E1 /* Tag.swift */; };
@@ -88,19 +79,15 @@
 		1E2B0E577721527BF472E0B9 /* Attention.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Attention.entitlements; sourceTree = "<group>"; };
 		21C99CD8B66AA3F1F179A6E1 /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		29E030676A3D6F3E33169375 /* iOSContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSContentView.swift; sourceTree = "<group>"; };
-		3A66F384240BDC15D7576A9E /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
-		3CC1525DB413D08BD00F6189 /* MarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRenderer.swift; sourceTree = "<group>"; };
+		3A998B8740E9CA0A929D738D /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		424FF2F8806530F62F0E4CAC /* MacContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacContentView.swift; sourceTree = "<group>"; };
-		466B156FF0B01182BC5178FF /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionTheme.swift; sourceTree = "<group>"; };
-		5BFF65102A9764F0E106D3EB /* NaturalDateParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaturalDateParser.swift; sourceTree = "<group>"; };
 		5EA7B0208A1E934BA7FEEB54 /* WatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchApp.swift; sourceTree = "<group>"; };
 		6563D5E560613A4781368157 /* Attention-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "Attention-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoRepository.swift; sourceTree = "<group>"; };
 		6A89F1EFEC20541BDA232FF0 /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
 		7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListViewModel.swift; sourceTree = "<group>"; };
 		83D772E3231A796D0EC486D1 /* AttentionWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = AttentionWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		8F91A7BA41A56E35FE145FAD /* iOSSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSSearchView.swift; sourceTree = "<group>"; };
 		B16248BCA7FD82AAB8D67212 /* Area.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Area.swift; sourceTree = "<group>"; };
 		B7A375F5810B139238F37646 /* Attention.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Attention.entitlements; sourceTree = "<group>"; };
 		BD47A4615574749DDDFA6BC3 /* Todo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Todo.swift; sourceTree = "<group>"; };
@@ -132,7 +119,7 @@
 		0E801EC3DD2F6D30E356058A /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				5BFF65102A9764F0E106D3EB /* NaturalDateParser.swift */,
+				3A998B8740E9CA0A929D738D /* NotificationService.swift */,
 				BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */,
 				664D8FDF9A7B0407698DCC5C /* TodoRepository.swift */,
 			);
@@ -231,7 +218,6 @@
 			isa = PBXGroup;
 			children = (
 				29E030676A3D6F3E33169375 /* iOSContentView.swift */,
-				8F91A7BA41A56E35FE145FAD /* iOSSearchView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -299,7 +285,6 @@
 			isa = PBXGroup;
 			children = (
 				424FF2F8806530F62F0E4CAC /* MacContentView.swift */,
-				3A66F384240BDC15D7576A9E /* SearchView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -315,7 +300,6 @@
 		B7ABA801B926A5E833F9D529 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				466B156FF0B01182BC5178FF /* SearchViewModel.swift */,
 				7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */,
 			);
 			name = ViewModels;
@@ -341,7 +325,6 @@
 			isa = PBXGroup;
 			children = (
 				4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */,
-				3CC1525DB413D08BD00F6189 /* MarkdownRenderer.swift */,
 			);
 			name = Extensions;
 			path = AttentionApp/Shared/Extensions;
@@ -473,7 +456,6 @@
 				C65973AA598C34839A88433C /* AttentionWidgets.swift in Sources */,
 				BDF1BD059C5832F9D06047D1 /* ChecklistItem.swift in Sources */,
 				CC4D692FAFA565FA684A22EB /* DataContainer.swift in Sources */,
-				238E65AAC0B5D584E2EB45BA /* MarkdownRenderer.swift in Sources */,
 				8069AA7FA8DCCB5A49D25428 /* Project.swift in Sources */,
 				319139791CD7FF3EDBF23F51 /* Recurrence.swift in Sources */,
 				086EB90FF0666F914B9EF5CE /* Tag.swift in Sources */,
@@ -489,12 +471,10 @@
 				1C12F268444B0B2F16FA4A0F /* AttentionTheme.swift in Sources */,
 				A92C05EBB44DFBDECFF94D5D /* ChecklistItem.swift in Sources */,
 				2ED8DB05B0A97CFFA825B2B4 /* DataContainer.swift in Sources */,
-				58CD5EE5D0DF8CBFDEB41296 /* MarkdownRenderer.swift in Sources */,
-				6938ADC42BE814C6B694E9AA /* NaturalDateParser.swift in Sources */,
+				56716B834A978F03A87F59BA /* NotificationService.swift in Sources */,
 				E188AF19FBF18B4B14883A64 /* Project.swift in Sources */,
 				D9D256A4F75E223059656357 /* ProjectRepository.swift in Sources */,
 				5CCE3D620683BCFE7625B3EA /* Recurrence.swift in Sources */,
-				5A9640E7DDA193C896A26AB5 /* SearchViewModel.swift in Sources */,
 				BC5481285FA62247A7A6D6C5 /* Tag.swift in Sources */,
 				94EF9C14DD36F90D6472059C /* Todo.swift in Sources */,
 				A6F1C052538963E9198AD84A /* TodoListViewModel.swift in Sources */,
@@ -514,14 +494,11 @@
 				A72EAB9B7F6AC8CB7CDDE718 /* ChecklistItem.swift in Sources */,
 				ACE4AB2751651573C43B3D8C /* DataContainer.swift in Sources */,
 				3F538F4F82F880AD83363809 /* MacContentView.swift in Sources */,
-				2298BD3FE631AB5EF711B86F /* MarkdownRenderer.swift in Sources */,
-				7F4D1932D2EA441B8309E65D /* NaturalDateParser.swift in Sources */,
+				77537F1447422C0E52EA6C53 /* NotificationService.swift in Sources */,
 				7A20121D36A757D70B028623 /* Project.swift in Sources */,
 				F5834C3F089D8061D8580428 /* ProjectRepository.swift in Sources */,
 				59BDE3A4524A05A874F5EA24 /* QuickEntryView.swift in Sources */,
 				2124445E1C63F370590E3704 /* Recurrence.swift in Sources */,
-				90D3046980FEF761D95C9AE2 /* SearchView.swift in Sources */,
-				DFEDE579BCB48AFDB1C1BF6C /* SearchViewModel.swift in Sources */,
 				F6DE98314B3EB3F1EAD194EA /* Tag.swift in Sources */,
 				B679777EE58D11A17F3524A4 /* Todo.swift in Sources */,
 				685D83ED5152FC19E4F87B2A /* TodoListViewModel.swift in Sources */,
@@ -538,18 +515,15 @@
 				F7FB3CACCF12417E05CCC6B1 /* AttentionTheme.swift in Sources */,
 				1DACABB60EE03D1F0F6701EC /* ChecklistItem.swift in Sources */,
 				970F17EB4A3717B00CA41969 /* DataContainer.swift in Sources */,
-				18DA97BCA39D56E6BCD3F388 /* MarkdownRenderer.swift in Sources */,
-				BD88BC9615E0A1D1F57DF438 /* NaturalDateParser.swift in Sources */,
+				F3D95E0F145BF2233B1E22DA /* NotificationService.swift in Sources */,
 				E7728E545180A9B5FE2768EF /* Project.swift in Sources */,
 				3CF7A295AA041D5A8FE65962 /* ProjectRepository.swift in Sources */,
 				4DB9C0115852FBD1DE97ADA9 /* Recurrence.swift in Sources */,
-				2DD7ED66DC2CB7B3FB69D93F /* SearchViewModel.swift in Sources */,
 				433650D565E962E91C2141EB /* Tag.swift in Sources */,
 				AFD96252A8F7DEF71DAF57AD /* Todo.swift in Sources */,
 				72982A7DF0E7684EC11AA217 /* TodoListViewModel.swift in Sources */,
 				EB5A97C1883110CE8E6B4B38 /* TodoRepository.swift in Sources */,
 				E7BDA90A353A2B75C670FC0B /* iOSContentView.swift in Sources */,
-				474D328ED8FFB80C3009A97F /* iOSSearchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

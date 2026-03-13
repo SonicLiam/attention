@@ -31,6 +31,9 @@ struct iOSContentView: View {
         .tint(Color.attentionPrimary)
         .onAppear {
             viewModel.setup(modelContext: modelContext)
+            Task {
+                _ = await NotificationService.shared.requestAuthorization()
+            }
         }
     }
 }
@@ -152,6 +155,9 @@ struct iOSTodoListView: View {
                                 Label("Delete", systemImage: "trash")
                             }
                         }
+                    }
+                    .onMove { source, destination in
+                        viewModel.reorderTodos(source, to: destination)
                     }
                 }
                 .listStyle(.plain)
@@ -492,6 +498,18 @@ struct iOSTodoRowView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     }
+
+                    if todo.recurrence != nil {
+                        Image(systemName: "repeat")
+                            .font(.caption)
+                            .foregroundStyle(Color.attentionPrimary)
+                    }
+
+                    if todo.reminderDate != nil {
+                        Image(systemName: "bell.fill")
+                            .font(.caption)
+                            .foregroundStyle(Color.attentionWarning)
+                    }
                 }
             }
 
@@ -541,6 +559,17 @@ struct iOSTodoDetailView: View {
     @State private var newChecklistTitle = ""
     @State private var hasChanges = false
 
+    // Recurrence state
+    @State private var hasRecurrence = false
+    @State private var recurrenceFrequency: RecurrenceFrequency = .daily
+    @State private var recurrenceInterval: Int = 1
+    @State private var selectedDaysOfWeek: Set<Int> = []
+
+    // Reminder state
+    @State private var hasReminder = false
+    @State private var reminderDate: Date = Date()
+    @State private var reminderOffset: ReminderOffset = .atTime
+
     var body: some View {
         Form {
             // Title section
@@ -576,6 +605,85 @@ struct iOSTodoDetailView: View {
                         displayedComponents: [.date, .hourAndMinute]
                     )
                     .tint(Color.attentionDanger)
+                }
+            }
+
+            // Reminder section
+            Section("Reminder") {
+                Toggle("Remind me", isOn: $hasReminder.animation())
+
+                if hasReminder {
+                    DatePicker(
+                        "Time",
+                        selection: $reminderDate,
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                    .tint(Color.attentionPrimary)
+                    .onChange(of: reminderDate) { hasChanges = true }
+
+                    Picker("Alert", selection: $reminderOffset) {
+                        ForEach(ReminderOffset.allCases, id: \.rawValue) { offset in
+                            Text(offset.label).tag(offset)
+                        }
+                    }
+                    .onChange(of: reminderOffset) { hasChanges = true }
+                }
+            }
+
+            // Repeat / Recurrence section
+            Section("Repeat") {
+                Toggle("Repeat", isOn: $hasRecurrence.animation())
+
+                if hasRecurrence {
+                    Picker("Frequency", selection: $recurrenceFrequency) {
+                        ForEach(RecurrenceFrequency.allCases, id: \.rawValue) { freq in
+                            Text(freq.label).tag(freq)
+                        }
+                    }
+                    .onChange(of: recurrenceFrequency) { hasChanges = true }
+
+                    if recurrenceFrequency == .custom {
+                        Stepper("Every \(recurrenceInterval) day(s)", value: $recurrenceInterval, in: 1...365)
+                            .onChange(of: recurrenceInterval) { hasChanges = true }
+                    }
+
+                    if recurrenceFrequency == .weekly {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 6) {
+                                ForEach(1...7, id: \.self) { day in
+                                    let dayName = Calendar.current.shortWeekdaySymbols[day - 1]
+                                    Button {
+                                        if selectedDaysOfWeek.contains(day) {
+                                            selectedDaysOfWeek.remove(day)
+                                        } else {
+                                            selectedDaysOfWeek.insert(day)
+                                        }
+                                        hasChanges = true
+                                    } label: {
+                                        Text(String(dayName.prefix(2)))
+                                            .font(.caption.weight(.medium))
+                                            .frame(width: 36, height: 36)
+                                            .background(
+                                                Circle()
+                                                    .fill(selectedDaysOfWeek.contains(day)
+                                                          ? Color.attentionPrimary
+                                                          : Color.clear)
+                                            )
+                                            .foregroundStyle(
+                                                selectedDaysOfWeek.contains(day)
+                                                    ? .white
+                                                    : .primary
+                                            )
+                                            .overlay(
+                                                Circle()
+                                                    .strokeBorder(Color.attentionPrimary.opacity(0.5), lineWidth: 1)
+                                            )
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -640,6 +748,9 @@ struct iOSTodoDetailView: View {
                             .foregroundStyle(item.isCompleted ? .secondary : .primary)
                     }
                 }
+                .onMove { source, destination in
+                    viewModel.reorderChecklistItems(source, to: destination, in: todo)
+                }
 
                 HStack {
                     Image(systemName: "plus.circle")
@@ -692,6 +803,20 @@ struct iOSTodoDetailView: View {
             hasScheduledDate = todo.scheduledDate != nil
             deadline = todo.deadline
             hasDeadline = todo.deadline != nil
+
+            // Recurrence
+            hasRecurrence = todo.recurrence != nil
+            if let rec = todo.recurrence {
+                recurrenceFrequency = rec.frequency
+                recurrenceInterval = rec.interval
+                selectedDaysOfWeek = Set(rec.daysOfWeek ?? [])
+            }
+
+            // Reminder
+            hasReminder = todo.reminderDate != nil
+            reminderDate = todo.reminderDate ?? Date()
+            reminderOffset = todo.reminderOffset ?? .atTime
+
             hasChanges = false
         }
     }
@@ -703,6 +828,34 @@ struct iOSTodoDetailView: View {
         todo.scheduledDate = hasScheduledDate ? (scheduledDate ?? Date()) : nil
         todo.deadline = hasDeadline ? (deadline ?? Date()) : nil
         todo.markDirty()
+
+        // Recurrence
+        if hasRecurrence {
+            if let existing = todo.recurrence {
+                existing.frequency = recurrenceFrequency
+                existing.interval = recurrenceInterval
+                existing.daysOfWeek = recurrenceFrequency == .weekly ? Array(selectedDaysOfWeek) : nil
+            } else if let ctx = viewModel.modelContext {
+                let rec = Recurrence(
+                    frequency: recurrenceFrequency,
+                    interval: recurrenceInterval,
+                    daysOfWeek: recurrenceFrequency == .weekly ? Array(selectedDaysOfWeek) : nil
+                )
+                ctx.insert(rec)
+                todo.recurrence = rec
+            }
+        } else if let rec = todo.recurrence {
+            todo.recurrence = nil
+            viewModel.modelContext?.delete(rec)
+        }
+
+        // Reminder
+        if hasReminder {
+            viewModel.setReminder(for: todo, date: reminderDate, offset: reminderOffset)
+        } else {
+            viewModel.removeReminder(for: todo)
+        }
+
         hasChanges = false
     }
 

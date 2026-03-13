@@ -1,6 +1,34 @@
 import Foundation
 import SwiftData
 
+// MARK: - Reminder Offset
+
+/// Reminder offset options for scheduling notifications relative to a todo's date
+enum ReminderOffset: String, Codable, CaseIterable, Sendable {
+    case atTime = "at_time"
+    case fifteenMinBefore = "15min_before"
+    case oneHourBefore = "1hr_before"
+    case oneDayBefore = "1day_before"
+
+    var label: String {
+        switch self {
+        case .atTime: "At time"
+        case .fifteenMinBefore: "15 minutes before"
+        case .oneHourBefore: "1 hour before"
+        case .oneDayBefore: "1 day before"
+        }
+    }
+
+    var timeInterval: TimeInterval {
+        switch self {
+        case .atTime: 0
+        case .fifteenMinBefore: -15 * 60
+        case .oneHourBefore: -3600
+        case .oneDayBefore: -86400
+        }
+    }
+}
+
 // MARK: - Todo Status
 
 enum TodoStatus: String, Codable, CaseIterable {
@@ -48,6 +76,8 @@ final class Todo {
     var deadline: Date?
     var sortOrder: Int
     var headingId: UUID?
+    var reminderDate: Date?
+    var reminderOffset: ReminderOffset?
 
     // Relationships
     @Relationship(inverse: \Project.todos) var project: Project?

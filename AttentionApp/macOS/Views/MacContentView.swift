@@ -31,6 +31,102 @@ struct MacContentView: View {
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
+            Task {
+                _ = await NotificationService.shared.requestAuthorization()
+            }
+        }
+        // MARK: - Keyboard Shortcuts
+        .keyboardShortcut("1", modifiers: .command)     // handled via buttons below
+        .toolbar {
+            // Sidebar navigation shortcuts (invisible buttons)
+            ToolbarItem(placement: .automatic) {
+                keyboardShortcutButtons
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var keyboardShortcutButtons: some View {
+        // Use an HStack of zero-frame buttons for keyboard shortcuts
+        HStack(spacing: 0) {
+            Button("") { viewModel.selectedSidebarItem = .inbox }
+                .keyboardShortcut("1", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            Button("") { viewModel.selectedSidebarItem = .today }
+                .keyboardShortcut("2", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            Button("") { viewModel.selectedSidebarItem = .upcoming }
+                .keyboardShortcut("3", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            Button("") { viewModel.selectedSidebarItem = .anytime }
+                .keyboardShortcut("4", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            Button("") { viewModel.selectedSidebarItem = .someday }
+                .keyboardShortcut("5", modifiers: .command)
+                .frame(width: 0, height: 0)
+                .opacity(0)
+
+            // Cmd+Delete: delete selected
+            Button("") {
+                if let todo = viewModel.selectedTodo {
+                    withAnimation(AttentionAnimation.springDefault) {
+                        viewModel.deleteTodo(todo)
+                    }
+                }
+            }
+            .keyboardShortcut(.delete, modifiers: .command)
+            .frame(width: 0, height: 0)
+            .opacity(0)
+
+            // Cmd+Shift+D: complete selected
+            Button("") {
+                if let todo = viewModel.selectedTodo {
+                    withAnimation(AttentionAnimation.springDefault) {
+                        viewModel.completeTodo(todo)
+                    }
+                }
+            }
+            .keyboardShortcut("d", modifiers: [.command, .shift])
+            .frame(width: 0, height: 0)
+            .opacity(0)
+
+            // Cmd+T: move to today
+            Button("") {
+                if let todo = viewModel.selectedTodo {
+                    viewModel.moveTodoToToday(todo)
+                }
+            }
+            .keyboardShortcut("t", modifiers: .command)
+            .frame(width: 0, height: 0)
+            .opacity(0)
+
+            // Cmd+P: cycle priority
+            Button("") {
+                viewModel.cyclePriority()
+            }
+            .keyboardShortcut("p", modifiers: .command)
+            .frame(width: 0, height: 0)
+            .opacity(0)
+
+            // Cmd+L: toggle logbook
+            Button("") {
+                if viewModel.selectedSidebarItem == .logbook {
+                    viewModel.selectedSidebarItem = .inbox
+                } else {
+                    viewModel.selectedSidebarItem = .logbook
+                }
+            }
+            .keyboardShortcut("l", modifiers: .command)
+            .frame(width: 0, height: 0)
+            .opacity(0)
         }
     }
 }
@@ -165,6 +261,15 @@ struct SidebarView: View {
                 .symbolRenderingMode(.hierarchical)
         }
         .tag(item)
+        .dropDestination(for: String.self) { items, _ in
+            for idString in items {
+                guard let uuid = UUID(uuidString: idString) else { continue }
+                if let todo = viewModel.todos.first(where: { $0.id == uuid }) {
+                    viewModel.moveTodo(todo, to: item)
+                }
+            }
+            return true
+        }
     }
 }
 
@@ -178,37 +283,53 @@ struct TodoListView: View {
     var body: some View {
         @Bindable var vm = viewModel
 
-        List(selection: $vm.selectedTodo) {
-            // New Todo Inline
-            HStack(spacing: 8) {
-                Image(systemName: "plus.circle.fill")
-                    .foregroundStyle(Color.attentionPrimary)
-                    .font(.system(size: AttentionLayout.iconSize))
+        VStack(spacing: 0) {
+            // Batch toolbar
+            if viewModel.isBatchMode {
+                batchToolbar
+            }
 
-                TextField("New To-Do", text: $newTodoTitle)
-                    .textFieldStyle(.plain)
-                    .focused($isNewTodoFocused)
-                    .onSubmit {
-                        if !newTodoTitle.isEmpty {
-                            withAnimation(AttentionAnimation.springDefault) {
-                                viewModel.createTodo(title: newTodoTitle)
+            List(selection: $vm.selectedTodo) {
+                // New Todo Inline
+                HStack(spacing: 8) {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundStyle(Color.attentionPrimary)
+                        .font(.system(size: AttentionLayout.iconSize))
+
+                    TextField("New To-Do", text: $newTodoTitle)
+                        .textFieldStyle(.plain)
+                        .focused($isNewTodoFocused)
+                        .onSubmit {
+                            if !newTodoTitle.isEmpty {
+                                withAnimation(AttentionAnimation.springDefault) {
+                                    viewModel.createTodo(title: newTodoTitle)
+                                }
+                                newTodoTitle = ""
                             }
-                            newTodoTitle = ""
                         }
-                    }
-            }
-            .padding(.vertical, AttentionLayout.tinyPadding)
+                }
+                .padding(.vertical, AttentionLayout.tinyPadding)
 
-            // Todo Items
-            ForEach(viewModel.todos) { todo in
-                TodoRowView(todo: todo)
-                    .tag(todo)
-                    .contextMenu {
-                        todoContextMenu(for: todo)
-                    }
+                // Todo Items
+                ForEach(viewModel.todos) { todo in
+                    TodoRowView(todo: todo)
+                        .tag(todo)
+                        .contextMenu {
+                            todoContextMenu(for: todo)
+                        }
+                        .draggable(todo.id.uuidString)
+                        .listRowBackground(
+                            viewModel.selectedTodos.contains(todo.id)
+                                ? Color.attentionPrimary.opacity(0.15)
+                                : Color.clear
+                        )
+                }
+                .onMove { source, destination in
+                    viewModel.reorderTodos(source, to: destination)
+                }
             }
+            .listStyle(.inset)
         }
-        .listStyle(.inset)
         .navigationTitle(viewModel.selectedSidebarItem?.title ?? "Attention")
         .searchable(text: $vm.searchQuery, prompt: "Search")
         .onChange(of: viewModel.searchQuery) {
@@ -240,6 +361,86 @@ struct TodoListView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Batch Toolbar
+
+    private var batchToolbar: some View {
+        HStack(spacing: 12) {
+            Text("\(viewModel.selectedTodos.count) selected")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Button {
+                withAnimation(AttentionAnimation.springDefault) {
+                    viewModel.batchComplete()
+                }
+            } label: {
+                Label("Complete", systemImage: "checkmark.circle")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Button {
+                viewModel.batchMoveToToday()
+            } label: {
+                Label("Today", systemImage: "star")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Menu {
+                ForEach(Priority.allCases, id: \.rawValue) { priority in
+                    Button(priority.label) {
+                        viewModel.batchSetPriority(priority)
+                    }
+                }
+            } label: {
+                Label("Priority", systemImage: "flag")
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+
+            if !viewModel.projects.isEmpty {
+                Menu {
+                    Button("None") {
+                        viewModel.batchMoveToProject(nil)
+                    }
+                    Divider()
+                    ForEach(viewModel.projects) { project in
+                        Button(project.title) {
+                            viewModel.batchMoveToProject(project)
+                        }
+                    }
+                } label: {
+                    Label("Project", systemImage: "list.bullet")
+                }
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+            }
+
+            Button(role: .destructive) {
+                withAnimation(AttentionAnimation.springDefault) {
+                    viewModel.batchDelete()
+                }
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Button {
+                viewModel.clearBatchSelection()
+            } label: {
+                Image(systemName: "xmark")
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, AttentionLayout.padding)
+        .padding(.vertical, AttentionLayout.smallPadding)
+        .background(.ultraThinMaterial)
     }
 
     @ViewBuilder
@@ -392,6 +593,18 @@ struct TodoRowView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+
+                    if todo.recurrence != nil {
+                        Image(systemName: "repeat")
+                            .font(.caption)
+                            .foregroundStyle(Color.attentionPrimary)
+                    }
+
+                    if todo.reminderDate != nil {
+                        Image(systemName: "bell.fill")
+                            .font(.caption)
+                            .foregroundStyle(Color.attentionWarning)
+                    }
                 }
             }
 
@@ -458,6 +671,17 @@ struct TodoDetailView: View {
     @State private var newChecklistTitle: String = ""
     @State private var showTagPicker = false
 
+    // Recurrence state
+    @State private var hasRecurrence: Bool = false
+    @State private var recurrenceFrequency: RecurrenceFrequency = .daily
+    @State private var recurrenceInterval: Int = 1
+    @State private var selectedDaysOfWeek: Set<Int> = []
+
+    // Reminder state
+    @State private var hasReminder: Bool = false
+    @State private var reminderDate: Date = Date()
+    @State private var reminderOffset: ReminderOffset = .atTime
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -518,6 +742,128 @@ struct TodoDetailView: View {
                                 todo.markDirty()
                                 viewModel.saveTodo()
                             }
+                        }
+                    }
+                }
+
+                // Reminder
+                detailSection("Reminder") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Toggle(isOn: $hasReminder) {
+                                Label("Remind me", systemImage: "bell")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                        }
+
+                        if hasReminder {
+                            DatePicker(
+                                "Reminder",
+                                selection: $reminderDate,
+                                displayedComponents: [.date, .hourAndMinute]
+                            )
+                            .labelsHidden()
+                            .onChange(of: reminderDate) {
+                                viewModel.setReminder(for: todo, date: reminderDate, offset: reminderOffset)
+                            }
+
+                            Picker("Alert", selection: $reminderOffset) {
+                                ForEach(ReminderOffset.allCases, id: \.rawValue) { offset in
+                                    Text(offset.label).tag(offset)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                            .onChange(of: reminderOffset) {
+                                viewModel.setReminder(for: todo, date: reminderDate, offset: reminderOffset)
+                            }
+                        }
+                    }
+                    .onChange(of: hasReminder) {
+                        if hasReminder {
+                            viewModel.setReminder(for: todo, date: reminderDate, offset: reminderOffset)
+                        } else {
+                            viewModel.removeReminder(for: todo)
+                        }
+                    }
+                }
+
+                // Repeat / Recurrence
+                detailSection("Repeat") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Toggle(isOn: $hasRecurrence) {
+                                Label("Repeat", systemImage: "repeat")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                        }
+
+                        if hasRecurrence {
+                            Picker("Frequency", selection: $recurrenceFrequency) {
+                                ForEach(RecurrenceFrequency.allCases, id: \.rawValue) { freq in
+                                    Text(freq.label).tag(freq)
+                                }
+                            }
+                            .onChange(of: recurrenceFrequency) { applyRecurrence() }
+
+                            if recurrenceFrequency == .custom {
+                                HStack {
+                                    Text("Every")
+                                        .foregroundStyle(.secondary)
+                                    TextField("", value: $recurrenceInterval, format: .number)
+                                        .textFieldStyle(.roundedBorder)
+                                        .frame(width: 50)
+                                        .onChange(of: recurrenceInterval) { applyRecurrence() }
+                                    Text("days")
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+
+                            if recurrenceFrequency == .weekly {
+                                HStack(spacing: 4) {
+                                    ForEach(1...7, id: \.self) { day in
+                                        let dayName = Calendar.current.shortWeekdaySymbols[day - 1]
+                                        Button {
+                                            if selectedDaysOfWeek.contains(day) {
+                                                selectedDaysOfWeek.remove(day)
+                                            } else {
+                                                selectedDaysOfWeek.insert(day)
+                                            }
+                                            applyRecurrence()
+                                        } label: {
+                                            Text(String(dayName.prefix(2)))
+                                                .font(.caption.weight(.medium))
+                                                .frame(width: 30, height: 30)
+                                                .background(
+                                                    Circle()
+                                                        .fill(selectedDaysOfWeek.contains(day)
+                                                              ? Color.attentionPrimary
+                                                              : Color.clear)
+                                                )
+                                                .foregroundStyle(
+                                                    selectedDaysOfWeek.contains(day)
+                                                        ? .white
+                                                        : .primary
+                                                )
+                                                .overlay(
+                                                    Circle()
+                                                        .strokeBorder(Color.attentionPrimary.opacity(0.5), lineWidth: 1)
+                                                )
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .onChange(of: hasRecurrence) {
+                        if hasRecurrence {
+                            applyRecurrence()
+                        } else {
+                            removeRecurrence()
                         }
                     }
                 }
@@ -645,6 +991,9 @@ struct TodoDetailView: View {
                                 .buttonStyle(.plain)
                             }
                         }
+                        .onMove { source, destination in
+                            viewModel.reorderChecklistItems(source, to: destination, in: todo)
+                        }
 
                         // Add checklist item
                         HStack(spacing: 8) {
@@ -682,11 +1031,54 @@ struct TodoDetailView: View {
         scheduledDate = todo.scheduledDate ?? Date()
         hasDeadline = todo.deadline != nil
         deadlineDate = todo.deadline ?? Date()
+
+        // Recurrence
+        hasRecurrence = todo.recurrence != nil
+        if let rec = todo.recurrence {
+            recurrenceFrequency = rec.frequency
+            recurrenceInterval = rec.interval
+            selectedDaysOfWeek = Set(rec.daysOfWeek ?? [])
+        }
+
+        // Reminder
+        hasReminder = todo.reminderDate != nil
+        reminderDate = todo.reminderDate ?? Date()
+        reminderOffset = todo.reminderOffset ?? .atTime
     }
 
     private func applyTitle() {
         guard todo.title != title else { return }
         todo.title = title
+        todo.markDirty()
+        viewModel.saveTodo()
+    }
+
+    private func applyRecurrence() {
+        guard let ctx = viewModel.modelContext else { return }
+
+        if let existing = todo.recurrence {
+            existing.frequency = recurrenceFrequency
+            existing.interval = recurrenceInterval
+            existing.daysOfWeek = recurrenceFrequency == .weekly ? Array(selectedDaysOfWeek) : nil
+        } else {
+            let rec = Recurrence(
+                frequency: recurrenceFrequency,
+                interval: recurrenceInterval,
+                daysOfWeek: recurrenceFrequency == .weekly ? Array(selectedDaysOfWeek) : nil
+            )
+            ctx.insert(rec)
+            todo.recurrence = rec
+        }
+        todo.markDirty()
+        viewModel.saveTodo()
+    }
+
+    private func removeRecurrence() {
+        guard let ctx = viewModel.modelContext else { return }
+        if let rec = todo.recurrence {
+            todo.recurrence = nil
+            ctx.delete(rec)
+        }
         todo.markDirty()
         viewModel.saveTodo()
     }

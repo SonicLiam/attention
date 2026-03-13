@@ -89,6 +89,12 @@ final class TodoListViewModel {
     var selectedTodo: Todo?
     var errorMessage: String?
     var showQuickEntry: Bool = false
+    var showLogbook: Bool = false
+
+    // Batch selection (macOS)
+    var selectedTodos: Set<UUID> = []
+    var isBatchMode: Bool { !selectedTodos.isEmpty }
+    var lastSelectedIndex: Int?
 
     private var todoRepository: TodoRepository?
     private var projectRepository: ProjectRepository?
@@ -211,9 +217,14 @@ final class TodoListViewModel {
     }
 
     func completeTodo(_ todo: Todo) {
-        todo.complete()
-        try? todoRepository?.save()
-        refresh()
+        if todo.recurrence != nil {
+            completeRecurringTodo(todo)
+        } else {
+            todo.complete()
+            NotificationService.shared.cancelNotifications(for: todo.id)
+            try? todoRepository?.save()
+            refresh()
+        }
     }
 
     func uncompleteTodo(_ todo: Todo) {
@@ -223,6 +234,7 @@ final class TodoListViewModel {
     }
 
     func deleteTodo(_ todo: Todo) {
+        NotificationService.shared.cancelNotifications(for: todo.id)
         todo.cancel()
         try? todoRepository?.save()
         if selectedTodo?.id == todo.id {
@@ -329,5 +341,270 @@ final class TodoListViewModel {
         } catch {
             return 0
         }
+    }
+
+    // MARK: - Drag & Drop Reordering
+
+    func reorderTodos(_ source: IndexSet, to destination: Int) {
+        var reordered = todos
+        reordered.move(fromOffsets: source, toOffset: destination)
+        for (index, todo) in reordered.enumerated() {
+            todo.sortOrder = index
+            todo.markDirty()
+        }
+        todos = reordered
+        try? todoRepository?.save()
+    }
+
+    func reorderChecklistItems(_ source: IndexSet, to destination: Int, in todo: Todo) {
+        var items = todo.checklist.sorted { $0.sortOrder < $1.sortOrder }
+        items.move(fromOffsets: source, toOffset: destination)
+        for (index, item) in items.enumerated() {
+            item.sortOrder = index
+        }
+        todo.markDirty()
+        try? todoRepository?.save()
+    }
+
+    func moveTodo(_ todo: Todo, to sidebarItem: SidebarItem) {
+        switch sidebarItem {
+        case .inbox:
+            todo.moveToInbox()
+        case .today:
+            todo.scheduleForToday()
+        case .someday:
+            todo.moveToSomeday()
+        case .anytime:
+            todo.scheduledDate = nil
+            todo.status = .active
+            todo.project = nil
+            todo.markDirty()
+        case .project(let project):
+            todo.project = project
+            todo.status = .active
+            todo.markDirty()
+        case .area(let area):
+            todo.area = area
+            todo.markDirty()
+        default:
+            break
+        }
+        try? todoRepository?.save()
+        refresh()
+    }
+
+    // MARK: - Batch Operations
+
+    func toggleBatchSelection(_ todo: Todo) {
+        if selectedTodos.contains(todo.id) {
+            selectedTodos.remove(todo.id)
+        } else {
+            selectedTodos.insert(todo.id)
+        }
+        if let index = todos.firstIndex(where: { $0.id == todo.id }) {
+            lastSelectedIndex = index
+        }
+    }
+
+    func rangeSelect(to todo: Todo) {
+        guard let lastIdx = lastSelectedIndex,
+              let currentIdx = todos.firstIndex(where: { $0.id == todo.id }) else {
+            toggleBatchSelection(todo)
+            return
+        }
+        let range = min(lastIdx, currentIdx)...max(lastIdx, currentIdx)
+        for i in range {
+            selectedTodos.insert(todos[i].id)
+        }
+    }
+
+    func clearBatchSelection() {
+        selectedTodos.removeAll()
+        lastSelectedIndex = nil
+    }
+
+    func batchComplete() {
+        let todosToComplete = todos.filter { selectedTodos.contains($0.id) }
+        for todo in todosToComplete {
+            if todo.recurrence != nil {
+                completeRecurringTodo(todo)
+            } else {
+                todo.complete()
+            }
+        }
+        try? todoRepository?.save()
+        clearBatchSelection()
+        refresh()
+    }
+
+    func batchDelete() {
+        let todosToDelete = todos.filter { selectedTodos.contains($0.id) }
+        for todo in todosToDelete {
+            NotificationService.shared.cancelNotifications(for: todo.id)
+            todo.cancel()
+        }
+        try? todoRepository?.save()
+        clearBatchSelection()
+        refresh()
+    }
+
+    func batchMoveToToday() {
+        let todosToMove = todos.filter { selectedTodos.contains($0.id) }
+        for todo in todosToMove {
+            todo.scheduleForToday()
+        }
+        try? todoRepository?.save()
+        clearBatchSelection()
+        refresh()
+    }
+
+    func batchSetPriority(_ priority: Priority) {
+        let todosToUpdate = todos.filter { selectedTodos.contains($0.id) }
+        for todo in todosToUpdate {
+            todo.priority = priority
+            todo.markDirty()
+        }
+        try? todoRepository?.save()
+        clearBatchSelection()
+        refresh()
+    }
+
+    func batchMoveToProject(_ project: Project?) {
+        let todosToMove = todos.filter { selectedTodos.contains($0.id) }
+        for todo in todosToMove {
+            todo.project = project
+            todo.markDirty()
+        }
+        try? todoRepository?.save()
+        clearBatchSelection()
+        refresh()
+    }
+
+    // MARK: - Recurrence
+
+    func completeRecurringTodo(_ todo: Todo) {
+        guard let recurrence = todo.recurrence,
+              let ctx = modelContext else {
+            todo.complete()
+            try? todoRepository?.save()
+            refresh()
+            return
+        }
+
+        // Complete the current todo
+        todo.complete()
+
+        // Calculate next date
+        let baseDate = todo.scheduledDate ?? Date()
+        guard let nextDate = recurrence.nextDate(after: baseDate) else {
+            // Recurrence ended
+            try? todoRepository?.save()
+            refresh()
+            return
+        }
+
+        // Create next occurrence
+        let nextTodo = Todo(
+            title: todo.title,
+            notes: todo.notes,
+            status: .active,
+            priority: todo.priority,
+            scheduledDate: nextDate,
+            deadline: todo.deadline.flatMap { deadline in
+                // Shift deadline by same interval
+                let diff = nextDate.timeIntervalSince(baseDate)
+                return deadline.addingTimeInterval(diff)
+            }
+        )
+        nextTodo.project = todo.project
+        nextTodo.area = todo.area
+        nextTodo.tags = todo.tags
+
+        // Clone recurrence
+        let newRecurrence = Recurrence(
+            frequency: recurrence.frequency,
+            interval: recurrence.interval,
+            daysOfWeek: recurrence.daysOfWeek,
+            dayOfMonth: recurrence.dayOfMonth,
+            endDate: recurrence.endDate
+        )
+        ctx.insert(newRecurrence)
+        nextTodo.recurrence = newRecurrence
+
+        // Clone reminder settings
+        nextTodo.reminderDate = nextDate
+        nextTodo.reminderOffset = todo.reminderOffset
+
+        ctx.insert(nextTodo)
+
+        // Schedule notification for next occurrence
+        if let offset = todo.reminderOffset {
+            NotificationService.shared.scheduleNotification(
+                for: nextTodo.id, title: nextTodo.title, date: nextDate, offset: offset
+            )
+        }
+
+        // Cancel notification for completed todo
+        NotificationService.shared.cancelNotifications(for: todo.id)
+
+        try? todoRepository?.save()
+        refresh()
+    }
+
+    // MARK: - Reminder / Notifications
+
+    func setReminder(for todo: Todo, date: Date, offset: ReminderOffset) {
+        todo.reminderDate = date
+        todo.reminderOffset = offset
+        todo.markDirty()
+        try? todoRepository?.save()
+
+        NotificationService.shared.scheduleNotification(
+            for: todo.id, title: todo.title, date: date, offset: offset
+        )
+    }
+
+    func removeReminder(for todo: Todo) {
+        todo.reminderDate = nil
+        todo.reminderOffset = nil
+        todo.markDirty()
+        try? todoRepository?.save()
+        NotificationService.shared.cancelNotifications(for: todo.id)
+    }
+
+    // MARK: - Keyboard Navigation
+
+    func selectNextTodo() {
+        guard !todos.isEmpty else { return }
+        if let current = selectedTodo,
+           let idx = todos.firstIndex(where: { $0.id == current.id }),
+           idx + 1 < todos.count {
+            selectedTodo = todos[idx + 1]
+        } else {
+            selectedTodo = todos.first
+        }
+    }
+
+    func selectPreviousTodo() {
+        guard !todos.isEmpty else { return }
+        if let current = selectedTodo,
+           let idx = todos.firstIndex(where: { $0.id == current.id }),
+           idx > 0 {
+            selectedTodo = todos[idx - 1]
+        } else {
+            selectedTodo = todos.last
+        }
+    }
+
+    func cyclePriority() {
+        guard let todo = selectedTodo else { return }
+        let next: Priority
+        switch todo.priority {
+        case .none: next = .low
+        case .low: next = .medium
+        case .medium: next = .high
+        case .high: next = .none
+        }
+        setPriority(todo, priority: next)
     }
 }

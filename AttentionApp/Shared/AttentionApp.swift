@@ -17,6 +17,9 @@ struct AttentionApp: App {
             MacContentView()
                 .environment(viewModel)
                 .modelContainer(container)
+                .task {
+                    _ = await NotificationService.shared.requestAuthorization()
+                }
         }
         .defaultSize(width: 1100, height: 700)
         .windowStyle(.titleBar)
@@ -26,6 +29,9 @@ struct AttentionApp: App {
             iOSContentView()
                 .environment(viewModel)
                 .modelContainer(container)
+                .task {
+                    _ = await NotificationService.shared.requestAuthorization()
+                }
         }
         #endif
     }
