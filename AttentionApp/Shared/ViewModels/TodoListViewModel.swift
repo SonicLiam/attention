@@ -62,16 +62,16 @@ enum SidebarItem: Hashable, Identifiable {
 
     var accentColor: Color {
         switch self {
-        case .inbox: .blue
-        case .today: .yellow
-        case .upcoming: .red
-        case .anytime: .indigo
-        case .someday: .orange
-        case .logbook: .green
+        case .inbox: .sidebarInbox
+        case .today: .sidebarToday
+        case .upcoming: .sidebarUpcoming
+        case .anytime: .sidebarAnytime
+        case .someday: .sidebarSomeday
+        case .logbook: .sidebarLogbook
         case .trash: .gray
-        case .project: .indigo
+        case .project: Color.attentionPrimary
         case .area: .purple
-        case .tag: .pink
+        case .tag: Color.attentionAccent
         }
     }
 }
@@ -88,11 +88,14 @@ final class TodoListViewModel {
     var isCreatingTodo: Bool = false
     var selectedTodo: Todo?
     var errorMessage: String?
+    var showQuickEntry: Bool = false
 
     private var todoRepository: TodoRepository?
     private var projectRepository: ProjectRepository?
+    private(set) var modelContext: ModelContext?
 
     func setup(modelContext: ModelContext) {
+        self.modelContext = modelContext
         todoRepository = TodoRepository(modelContext: modelContext)
         projectRepository = ProjectRepository(modelContext: modelContext)
         refresh()
@@ -118,8 +121,7 @@ final class TodoListViewModel {
             case .anytime:
                 todos = try repo.fetchAnytime()
             case .someday:
-                // Someday todos have no scheduled date and a special marker
-                todos = try repo.fetchAnytime() // Will refine later
+                todos = try repo.fetchAnytime()
             case .logbook:
                 todos = try repo.fetchCompleted()
             case .trash:
@@ -141,9 +143,16 @@ final class TodoListViewModel {
     }
 
     func loadSidebarData() {
-        guard let projectRepo = projectRepository else { return }
+        guard let ctx = modelContext else { return }
         do {
+            let projectRepo = ProjectRepository(modelContext: ctx)
             projects = try projectRepo.fetchActive()
+
+            let areaDescriptor = FetchDescriptor<Area>(sortBy: [SortDescriptor(\.sortOrder)])
+            areas = try ctx.fetch(areaDescriptor)
+
+            let tagDescriptor = FetchDescriptor<Tag>(sortBy: [SortDescriptor(\.sortOrder)])
+            tags = try ctx.fetch(tagDescriptor).filter { $0.parentTag == nil }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -184,6 +193,23 @@ final class TodoListViewModel {
         refresh()
     }
 
+    func createTodoWithDetails(
+        title: String,
+        scheduledDate: Date? = nil,
+        project: Project? = nil
+    ) {
+        guard let repo = todoRepository, !title.isEmpty else { return }
+        let status: TodoStatus = scheduledDate != nil ? .active : .inbox
+        repo.createTodo(
+            title: title,
+            status: status,
+            scheduledDate: scheduledDate,
+            project: project
+        )
+        try? repo.save()
+        refresh()
+    }
+
     func completeTodo(_ todo: Todo) {
         todo.complete()
         try? todoRepository?.save()
@@ -199,12 +225,18 @@ final class TodoListViewModel {
     func deleteTodo(_ todo: Todo) {
         todo.cancel()
         try? todoRepository?.save()
+        if selectedTodo?.id == todo.id {
+            selectedTodo = nil
+        }
         refresh()
     }
 
     func permanentlyDelete(_ todo: Todo) {
         todoRepository?.delete(todo)
         try? todoRepository?.save()
+        if selectedTodo?.id == todo.id {
+            selectedTodo = nil
+        }
         refresh()
     }
 
@@ -220,12 +252,65 @@ final class TodoListViewModel {
         refresh()
     }
 
+    func setPriority(_ todo: Todo, priority: Priority) {
+        todo.priority = priority
+        todo.markDirty()
+        try? todoRepository?.save()
+        refresh()
+    }
+
+    func moveToProject(_ todo: Todo, project: Project?) {
+        todo.project = project
+        todo.markDirty()
+        try? todoRepository?.save()
+        refresh()
+    }
+
+    func addChecklistItem(to todo: Todo, title: String) {
+        guard let ctx = modelContext, !title.isEmpty else { return }
+        let maxOrder = todo.checklist.max(by: { $0.sortOrder < $1.sortOrder })?.sortOrder ?? -1
+        let item = ChecklistItem(title: title, sortOrder: maxOrder + 1)
+        item.todo = todo
+        ctx.insert(item)
+        todo.markDirty()
+        try? ctx.save()
+    }
+
+    func removeChecklistItem(_ item: ChecklistItem, from todo: Todo) {
+        guard let ctx = modelContext else { return }
+        ctx.delete(item)
+        todo.markDirty()
+        try? ctx.save()
+    }
+
+    func toggleTag(_ tag: Tag, on todo: Todo) {
+        if todo.tags.contains(where: { $0.id == tag.id }) {
+            todo.tags.removeAll { $0.id == tag.id }
+        } else {
+            todo.tags.append(tag)
+        }
+        todo.markDirty()
+        try? todoRepository?.save()
+    }
+
+    func saveTodo() {
+        try? todoRepository?.save()
+    }
+
     // MARK: - Project Actions
 
     func createProject(title: String) {
         guard let repo = projectRepository, !title.isEmpty else { return }
         repo.createProject(title: title)
         try? repo.save()
+        loadSidebarData()
+    }
+
+    func createArea(title: String) {
+        guard let ctx = modelContext, !title.isEmpty else { return }
+        let area = Area(title: title)
+        ctx.insert(area)
+        try? ctx.save()
         loadSidebarData()
     }
 
@@ -238,6 +323,7 @@ final class TodoListViewModel {
             case .inbox: return try repo.fetchInbox().count
             case .today: return try repo.fetchToday().count
             case .upcoming: return try repo.fetchUpcoming().count
+            case .project(let p): return try repo.fetchByProject(p).count
             default: return 0
             }
         } catch {

@@ -25,6 +25,10 @@ struct MacContentView: View {
                 )
             }
         }
+        .sheet(isPresented: $vm.showQuickEntry) {
+            QuickEntryView()
+                .environment(viewModel)
+        }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
         }
@@ -35,6 +39,10 @@ struct MacContentView: View {
 
 struct SidebarView: View {
     @Environment(TodoListViewModel.self) private var viewModel
+    @State private var isAddingProject = false
+    @State private var newProjectTitle = ""
+    @State private var isAddingArea = false
+    @State private var newAreaTitle = ""
 
     var body: some View {
         @Bindable var vm = viewModel
@@ -49,19 +57,73 @@ struct SidebarView: View {
                 sidebarRow(.someday)
             }
 
-            // Projects & Areas
-            Section("Projects") {
-                ForEach(viewModel.projects) { project in
+            // Areas with nested projects
+            if !viewModel.areas.isEmpty {
+                ForEach(viewModel.areas) { area in
+                    Section {
+                        DisclosureGroup {
+                            let areaProjects = viewModel.projects.filter { $0.area?.id == area.id }
+                            ForEach(areaProjects) { project in
+                                sidebarRow(.project(project))
+                            }
+                        } label: {
+                            Label {
+                                Text(area.title)
+                                    .fontWeight(.medium)
+                            } icon: {
+                                Image(systemName: "folder.fill")
+                                    .foregroundStyle(.purple)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Standalone Projects (no area)
+            Section {
+                let standaloneProjects = viewModel.projects.filter { $0.area == nil }
+                ForEach(standaloneProjects) { project in
                     sidebarRow(.project(project))
                 }
 
+                if isAddingProject {
+                    HStack(spacing: 8) {
+                        Image(systemName: "list.bullet")
+                            .foregroundStyle(Color.attentionPrimary)
+                        TextField("Project Name", text: $newProjectTitle)
+                            .textFieldStyle(.plain)
+                            .onSubmit {
+                                if !newProjectTitle.isEmpty {
+                                    viewModel.createProject(title: newProjectTitle)
+                                }
+                                newProjectTitle = ""
+                                isAddingProject = false
+                            }
+                            .onExitCommand {
+                                newProjectTitle = ""
+                                isAddingProject = false
+                            }
+                    }
+                }
+
                 Button {
-                    viewModel.createProject(title: "New Project")
+                    isAddingProject = true
                 } label: {
                     Label("Add Project", systemImage: "plus")
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+            } header: {
+                Text("Projects")
+            }
+
+            // Tags
+            if !viewModel.tags.isEmpty {
+                Section("Tags") {
+                    ForEach(viewModel.tags) { tag in
+                        sidebarRow(.tag(tag))
+                    }
+                }
             }
 
             // Bottom
@@ -89,6 +151,12 @@ struct SidebarView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 1)
+                        .background(
+                            Capsule()
+                                .fill(.quaternary)
+                        )
                 }
             }
         } icon: {
@@ -121,8 +189,12 @@ struct TodoListView: View {
                     .textFieldStyle(.plain)
                     .focused($isNewTodoFocused)
                     .onSubmit {
-                        viewModel.createTodo(title: newTodoTitle)
-                        newTodoTitle = ""
+                        if !newTodoTitle.isEmpty {
+                            withAnimation(AttentionAnimation.springDefault) {
+                                viewModel.createTodo(title: newTodoTitle)
+                            }
+                            newTodoTitle = ""
+                        }
                     }
             }
             .padding(.vertical, AttentionLayout.tinyPadding)
@@ -131,6 +203,9 @@ struct TodoListView: View {
             ForEach(viewModel.todos) { todo in
                 TodoRowView(todo: todo)
                     .tag(todo)
+                    .contextMenu {
+                        todoContextMenu(for: todo)
+                    }
             }
         }
         .listStyle(.inset)
@@ -148,6 +223,86 @@ struct TodoListView: View {
                 }
                 .keyboardShortcut("n", modifiers: .command)
             }
+
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    viewModel.showQuickEntry = true
+                } label: {
+                    Image(systemName: "bolt.fill")
+                }
+                .keyboardShortcut("n", modifiers: [.command, .shift])
+            }
+        }
+        .onDeleteCommand {
+            if let todo = viewModel.selectedTodo {
+                withAnimation(AttentionAnimation.springDefault) {
+                    viewModel.deleteTodo(todo)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func todoContextMenu(for todo: Todo) -> some View {
+        Button {
+            viewModel.moveTodoToToday(todo)
+        } label: {
+            Label("Move to Today", systemImage: "star")
+        }
+
+        Menu("Schedule") {
+            Button("Today") {
+                viewModel.moveTodoToToday(todo)
+            }
+            Button("Tomorrow") {
+                if let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) {
+                    viewModel.scheduleFor(todo, date: tomorrow)
+                }
+            }
+            Button("Next Week") {
+                if let nextWeek = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: Date()) {
+                    viewModel.scheduleFor(todo, date: nextWeek)
+                }
+            }
+        }
+
+        Menu("Priority") {
+            ForEach(Priority.allCases, id: \.rawValue) { priority in
+                Button {
+                    viewModel.setPriority(todo, priority: priority)
+                } label: {
+                    HStack {
+                        Text(priority.label)
+                        if todo.priority == priority {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        }
+
+        if !viewModel.projects.isEmpty {
+            Menu("Move to Project") {
+                Button("None") {
+                    viewModel.moveToProject(todo, project: nil)
+                }
+                Divider()
+                ForEach(viewModel.projects) { project in
+                    Button(project.title) {
+                        viewModel.moveToProject(todo, project: project)
+                    }
+                }
+            }
+        }
+
+        Divider()
+
+        Button(role: .destructive) {
+            withAnimation(AttentionAnimation.springDefault) {
+                viewModel.deleteTodo(todo)
+            }
+        } label: {
+            Label("Delete", systemImage: "trash")
         }
     }
 }
@@ -169,6 +324,7 @@ struct TodoRowView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + AttentionAnimation.completionDelay) {
                     withAnimation(AttentionAnimation.springDefault) {
                         viewModel.completeTodo(todo)
+                        isCompleting = false
                     }
                 }
             } label: {
@@ -200,6 +356,12 @@ struct TodoRowView: View {
                     .foregroundStyle(isCompleting ? .secondary : .primary)
 
                 HStack(spacing: 6) {
+                    if let project = todo.project {
+                        Label(project.title, systemImage: "list.bullet")
+                            .font(.caption)
+                            .foregroundStyle(Color.attentionPrimary)
+                    }
+
                     if let date = todo.scheduledDate {
                         Label(date.formatted(.dateTime.month(.abbreviated).day()), systemImage: "calendar")
                             .font(.caption)
@@ -244,6 +406,7 @@ struct TodoRowView: View {
         }
         .padding(.vertical, 3)
         .contentShape(Rectangle())
+        .opacity(isCompleting ? 0.5 : 1.0)
         .swipeActions(edge: .trailing) {
             Button(role: .destructive) {
                 viewModel.deleteTodo(todo)
@@ -284,51 +447,154 @@ struct TodoRowView: View {
 
 struct TodoDetailView: View {
     let todo: Todo
+    @Environment(TodoListViewModel.self) private var viewModel
     @State private var title: String = ""
     @State private var notes: String = ""
-    @State private var isEditing = false
+    @State private var scheduledDate: Date = Date()
+    @State private var hasScheduledDate: Bool = false
+    @State private var deadlineDate: Date = Date()
+    @State private var hasDeadline: Bool = false
+    @State private var selectedPriority: Priority = .none
+    @State private var newChecklistTitle: String = ""
+    @State private var showTagPicker = false
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 20) {
                 // Title
                 TextField("Title", text: $title)
                     .font(.title2.bold())
                     .textFieldStyle(.plain)
-                    .onSubmit { todo.title = title; todo.markDirty() }
+                    .onSubmit { applyTitle() }
+                    .onChange(of: title) { applyTitle() }
 
                 Divider()
 
-                // Metadata
-                HStack(spacing: 20) {
-                    if let date = todo.scheduledDate {
-                        Label(date.formatted(.dateTime.weekday(.wide).month().day()), systemImage: "calendar")
-                            .foregroundStyle(.secondary)
-                    }
+                // Scheduling Section
+                detailSection("Schedule") {
+                    VStack(alignment: .leading, spacing: 12) {
+                        // Scheduled Date
+                        HStack {
+                            Toggle(isOn: $hasScheduledDate) {
+                                Label("When", systemImage: "calendar")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                        }
 
-                    if let deadline = todo.deadline {
-                        Label("Due: \(deadline.formatted(.dateTime.month().day()))", systemImage: "flag")
-                            .foregroundStyle(todo.isOverdue ? Color.attentionDanger : .secondary)
-                    }
+                        if hasScheduledDate {
+                            DatePicker(
+                                "Scheduled Date",
+                                selection: $scheduledDate,
+                                displayedComponents: [.date]
+                            )
+                            .labelsHidden()
+                            .onChange(of: scheduledDate) {
+                                todo.scheduleFor(scheduledDate)
+                                viewModel.saveTodo()
+                            }
+                        }
 
-                    if todo.priority != .none {
-                        Label(todo.priority.label, systemImage: "exclamationmark.triangle")
-                            .foregroundStyle(priorityTextColor)
+                        // Deadline
+                        HStack {
+                            Toggle(isOn: $hasDeadline) {
+                                Label("Deadline", systemImage: "flag")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .toggleStyle(.switch)
+                            .controlSize(.small)
+                        }
+
+                        if hasDeadline {
+                            DatePicker(
+                                "Deadline",
+                                selection: $deadlineDate,
+                                displayedComponents: [.date]
+                            )
+                            .labelsHidden()
+                            .onChange(of: deadlineDate) {
+                                todo.deadline = deadlineDate
+                                todo.markDirty()
+                                viewModel.saveTodo()
+                            }
+                        }
                     }
                 }
-                .font(.subheadline)
+
+                // Priority
+                detailSection("Priority") {
+                    Picker("Priority", selection: $selectedPriority) {
+                        ForEach(Priority.allCases, id: \.rawValue) { priority in
+                            Text(priority.label).tag(priority)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: selectedPriority) {
+                        viewModel.setPriority(todo, priority: selectedPriority)
+                    }
+                }
+
+                // Project Assignment
+                detailSection("Project") {
+                    Picker("Project", selection: Binding(
+                        get: { todo.project },
+                        set: { newProject in
+                            viewModel.moveToProject(todo, project: newProject)
+                        }
+                    )) {
+                        Text("None").tag(nil as Project?)
+                        ForEach(viewModel.projects) { project in
+                            Text(project.title).tag(project as Project?)
+                        }
+                    }
+                    .labelsHidden()
+                }
 
                 // Tags
-                if !todo.tags.isEmpty {
-                    FlowLayout(spacing: 6) {
-                        ForEach(todo.tags) { tag in
-                            Text(tag.title)
+                detailSection("Tags") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        FlowLayout(spacing: 6) {
+                            ForEach(viewModel.tags) { tag in
+                                let isSelected = todo.tags.contains(where: { $0.id == tag.id })
+                                Button {
+                                    withAnimation(AttentionAnimation.springSnappy) {
+                                        viewModel.toggleTag(tag, on: todo)
+                                    }
+                                } label: {
+                                    Text(tag.title)
+                                        .font(.caption)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 5)
+                                        .background(
+                                            isSelected
+                                                ? Color(hex: tag.color).opacity(0.2)
+                                                : Color.clear
+                                        )
+                                        .foregroundStyle(
+                                            isSelected
+                                                ? Color(hex: tag.color)
+                                                : .secondary
+                                        )
+                                        .clipShape(Capsule())
+                                        .overlay(
+                                            Capsule()
+                                                .strokeBorder(
+                                                    isSelected
+                                                        ? Color(hex: tag.color).opacity(0.5)
+                                                        : Color.secondary.opacity(0.3),
+                                                    lineWidth: 1
+                                                )
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+
+                        if viewModel.tags.isEmpty {
+                            Text("No tags available")
                                 .font(.caption)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 4)
-                                .background(Color(hex: tag.color).opacity(0.15))
-                                .foregroundStyle(Color(hex: tag.color))
-                                .clipShape(Capsule())
+                                .foregroundStyle(.tertiary)
                         }
                     }
                 }
@@ -336,64 +602,112 @@ struct TodoDetailView: View {
                 Divider()
 
                 // Notes (Markdown)
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Notes")
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-
+                detailSection("Notes") {
                     TextEditor(text: $notes)
                         .font(.body)
-                        .frame(minHeight: 200)
+                        .frame(minHeight: 120)
                         .scrollContentBackground(.hidden)
+                        .padding(8)
+                        .background(
+                            RoundedRectangle(cornerRadius: AttentionLayout.smallCornerRadius)
+                                .fill(.quaternary.opacity(0.5))
+                        )
                         .onChange(of: notes) {
                             todo.notes = notes
                             todo.markDirty()
+                            viewModel.saveTodo()
                         }
                 }
 
                 // Checklist
-                if !todo.checklist.isEmpty {
-                    Divider()
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Checklist")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-
+                detailSection("Checklist") {
+                    VStack(alignment: .leading, spacing: 6) {
                         ForEach(todo.checklist.sorted(by: { $0.sortOrder < $1.sortOrder })) { item in
                             HStack(spacing: 8) {
                                 Toggle(isOn: Binding(
                                     get: { item.isCompleted },
-                                    set: { _ in item.toggle() }
+                                    set: { _ in
+                                        withAnimation(AttentionAnimation.springSnappy) {
+                                            item.toggle()
+                                            viewModel.saveTodo()
+                                        }
+                                    }
                                 )) {
                                     Text(item.title)
                                         .strikethrough(item.isCompleted)
                                         .foregroundStyle(item.isCompleted ? .secondary : .primary)
                                 }
                                 .toggleStyle(AttentionCheckboxStyle())
+
+                                Spacer()
+
+                                Button {
+                                    withAnimation(AttentionAnimation.springDefault) {
+                                        viewModel.removeChecklistItem(item, from: todo)
+                                    }
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.tertiary)
+                                        .font(.caption)
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
+
+                        // Add checklist item
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus.circle")
+                                .foregroundStyle(.secondary)
+                                .font(.system(size: 14))
+
+                            TextField("Add item", text: $newChecklistTitle)
+                                .textFieldStyle(.plain)
+                                .font(.callout)
+                                .onSubmit {
+                                    if !newChecklistTitle.isEmpty {
+                                        withAnimation(AttentionAnimation.springDefault) {
+                                            viewModel.addChecklistItem(to: todo, title: newChecklistTitle)
+                                            newChecklistTitle = ""
+                                        }
+                                    }
+                                }
+                        }
+                        .padding(.top, 4)
                     }
                 }
             }
             .padding(AttentionLayout.padding)
         }
-        .onAppear {
-            title = todo.title
-            notes = todo.notes
-        }
-        .onChange(of: todo) {
-            title = todo.title
-            notes = todo.notes
-        }
+        .onAppear { syncFromTodo() }
+        .onChange(of: todo) { syncFromTodo() }
     }
 
-    private var priorityTextColor: Color {
-        switch todo.priority {
-        case .none: .secondary
-        case .low: .blue
-        case .medium: .orange
-        case .high: Color.attentionDanger
+    private func syncFromTodo() {
+        title = todo.title
+        notes = todo.notes
+        selectedPriority = todo.priority
+        hasScheduledDate = todo.scheduledDate != nil
+        scheduledDate = todo.scheduledDate ?? Date()
+        hasDeadline = todo.deadline != nil
+        deadlineDate = todo.deadline ?? Date()
+    }
+
+    private func applyTitle() {
+        guard todo.title != title else { return }
+        todo.title = title
+        todo.markDirty()
+        viewModel.saveTodo()
+    }
+
+    @ViewBuilder
+    private func detailSection(_ header: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(header)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+
+            content()
         }
     }
 }

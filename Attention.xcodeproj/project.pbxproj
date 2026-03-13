@@ -22,6 +22,7 @@
 		433650D565E962E91C2141EB /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C99CD8B66AA3F1F179A6E1 /* Tag.swift */; };
 		4DB9C0115852FBD1DE97ADA9 /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
 		57B5162654B2C314AF8A511F /* Area.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16248BCA7FD82AAB8D67212 /* Area.swift */; };
+		59BDE3A4524A05A874F5EA24 /* QuickEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD8015D152602F062EB815D6 /* QuickEntryView.swift */; };
 		5CCE3D620683BCFE7625B3EA /* Recurrence.swift in Sources */ = {isa = PBXBuildFile; fileRef = E056D8C9B50B49491E6274AD /* Recurrence.swift */; };
 		682FBFE979DCC8B55D66A7EF /* AttentionTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB6C56AFBECA9B4D7398506 /* AttentionTheme.swift */; };
 		685D83ED5152FC19E4F87B2A /* TodoListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DD57CF75A532B8DBF4A0D22 /* TodoListViewModel.swift */; };
@@ -89,6 +90,7 @@
 		BDAF28A154B08CBDD991C982 /* ProjectRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectRepository.swift; sourceTree = "<group>"; };
 		C738DF953C3DDE38C6DCB103 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
 		D9C6D0588687069974DC35F6 /* AttentionWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttentionWidgets.swift; sourceTree = "<group>"; };
+		DD8015D152602F062EB815D6 /* QuickEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickEntryView.swift; sourceTree = "<group>"; };
 		E056D8C9B50B49491E6274AD /* Recurrence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recurrence.swift; sourceTree = "<group>"; };
 		E54ACC6A347A27A03E72D492 /* ChecklistItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -174,6 +176,14 @@
 			path = AttentionApp/iOS;
 			sourceTree = "<group>";
 		};
+		4858378AA67396CF29718459 /* QuickEntry */ = {
+			isa = PBXGroup;
+			children = (
+				DD8015D152602F062EB815D6 /* QuickEntryView.swift */,
+			);
+			path = QuickEntry;
+			sourceTree = "<group>";
+		};
 		50E02927D8803BA82F7553EE = {
 			isa = PBXGroup;
 			children = (
@@ -232,6 +242,7 @@
 		75450288DA314BCC6C22D16F /* macOS */ = {
 			isa = PBXGroup;
 			children = (
+				4858378AA67396CF29718459 /* QuickEntry */,
 				B0A205979A3846AC814B4ABF /* Views */,
 				B7A375F5810B139238F37646 /* Attention.entitlements */,
 			);
@@ -479,6 +490,7 @@
 				3F538F4F82F880AD83363809 /* MacContentView.swift in Sources */,
 				7A20121D36A757D70B028623 /* Project.swift in Sources */,
 				F5834C3F089D8061D8580428 /* ProjectRepository.swift in Sources */,
+				59BDE3A4524A05A874F5EA24 /* QuickEntryView.swift in Sources */,
 				2124445E1C63F370590E3704 /* Recurrence.swift in Sources */,
 				F6DE98314B3EB3F1EAD194EA /* Tag.swift in Sources */,
 				B679777EE58D11A17F3524A4 /* Todo.swift in Sources */,
