@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: attention-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DATABASE_URL=postgresql://attention:attention_secret@postgres:5432/attention
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change-me-refresh-in-production}
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - attention-net
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: attention-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: attention
+      POSTGRES_PASSWORD: attention_secret
+      POSTGRES_DB: attention
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U attention"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - attention-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: attention-redis
+    restart: unless-stopped
+    volumes:
+      - redisdata:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - attention-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: attention-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - attention-net
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  attention-net:
+    driver: bridge
