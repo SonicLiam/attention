@@ -104,9 +104,11 @@ final class TodoListViewModel {
     private(set) var modelContext: ModelContext?
 
     func setup(modelContext: ModelContext) {
+        guard self.modelContext !== modelContext else { return }
         self.modelContext = modelContext
         todoRepository = TodoRepository(modelContext: modelContext)
         projectRepository = ProjectRepository(modelContext: modelContext)
+        print("[Attention] ViewModel setup with modelContext")
         refresh()
     }
 
@@ -118,36 +120,65 @@ final class TodoListViewModel {
     }
 
     func loadTodosForCurrentView() {
-        guard let repo = todoRepository else { return }
+        guard let ctx = modelContext else {
+            print("[Attention] loadTodos: modelContext is nil")
+            return
+        }
         do {
+            // Use direct SwiftData fetch to avoid #Predicate enum issues
+            let allDescriptor = FetchDescriptor<Todo>(sortBy: [SortDescriptor(\.sortOrder)])
+            let allTodos = try ctx.fetch(allDescriptor)
+
             switch selectedSidebarItem {
             case .inbox:
-                todos = try repo.fetchInbox()
+                todos = allTodos.filter { $0.status == .inbox }
             case .today:
-                todos = try repo.fetchToday()
+                let today = Calendar.current.startOfDay(for: Date())
+                let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
+                todos = allTodos.filter {
+                    ($0.status == .active || $0.status == .inbox) &&
+                    $0.scheduledDate != nil &&
+                    $0.scheduledDate! >= today &&
+                    $0.scheduledDate! < tomorrow
+                }
             case .upcoming:
-                todos = try repo.fetchUpcoming()
+                let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: Date()))!
+                todos = allTodos.filter {
+                    ($0.status == .active || $0.status == .inbox) &&
+                    $0.scheduledDate != nil &&
+                    $0.scheduledDate! >= tomorrow
+                }.sorted { ($0.scheduledDate ?? .distantFuture) < ($1.scheduledDate ?? .distantFuture) }
             case .anytime:
-                todos = try repo.fetchAnytime()
+                todos = allTodos.filter { $0.status == .active && $0.scheduledDate == nil }
             case .someday:
-                todos = try repo.fetchAnytime()
+                todos = allTodos.filter { $0.status == .active && $0.scheduledDate == nil }
             case .logbook:
-                todos = try repo.fetchCompleted()
+                todos = allTodos.filter { $0.status == .completed }
+                    .sorted { ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast) }
             case .trash:
-                todos = try repo.fetchByStatus(.cancelled)
+                todos = allTodos.filter { $0.status == .cancelled }
             case .project(let project):
-                todos = try repo.fetchByProject(project)
+                todos = allTodos.filter { $0.project?.id == project.id && $0.status != .completed && $0.status != .cancelled }
             case .tag(let tag):
-                todos = try repo.fetchByTag(tag)
+                todos = allTodos.filter { todo in
+                    (todo.status == .active || todo.status == .inbox) &&
+                    todo.tags.contains(where: { $0.id == tag.id })
+                }
             case .area, .none:
                 todos = []
             }
 
             if !searchQuery.isEmpty {
-                todos = try repo.search(query: searchQuery)
+                let query = searchQuery.lowercased()
+                todos = allTodos.filter {
+                    $0.title.lowercased().contains(query) ||
+                    $0.notes.lowercased().contains(query)
+                }
             }
+            print("[Attention] Loaded \(todos.count) todos for \(selectedSidebarItem?.title ?? "none")")
         } catch {
             errorMessage = error.localizedDescription
+            print("[Attention] Error loading todos: \(error)")
         }
     }
 
@@ -170,7 +201,11 @@ final class TodoListViewModel {
     // MARK: - Todo Actions
 
     func createTodo(title: String) {
-        guard let repo = todoRepository, !title.isEmpty else { return }
+        guard let repo = todoRepository, !title.isEmpty else {
+            print("[Attention] createTodo failed: repo=\(todoRepository != nil), title='\(title)'")
+            return
+        }
+        print("[Attention] Creating todo: '\(title)'")
 
         let status: TodoStatus
         let scheduledDate: Date?
