@@ -206,16 +206,19 @@ final class TodoListViewModel {
     func createTodoWithDetails(
         title: String,
         scheduledDate: Date? = nil,
+        priority: Priority = .none,
         project: Project? = nil
     ) {
         guard let repo = todoRepository, !title.isEmpty else { return }
         let status: TodoStatus = scheduledDate != nil ? .active : .inbox
-        repo.createTodo(
+        let todo = repo.createTodo(
             title: title,
             status: status,
+            priority: priority,
             scheduledDate: scheduledDate,
             project: project
         )
+        if let project { todo.project = project }
         try? repo.save()
         notifySync()
         refresh()

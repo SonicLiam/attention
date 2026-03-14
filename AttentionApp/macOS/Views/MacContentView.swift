@@ -31,9 +31,9 @@ struct MacContentView: View {
         }
         .onAppear {
             viewModel.setup(modelContext: modelContext)
-            Task {
-                _ = await NotificationService.shared.requestAuthorization()
-            }
+        }
+        .onChange(of: modelContext) {
+            viewModel.setup(modelContext: modelContext)
         }
         // MARK: - Keyboard Shortcuts
         .keyboardShortcut("1", modifiers: .command)     // handled via buttons below

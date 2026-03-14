@@ -9,6 +9,7 @@ struct QuickEntryView: View {
     @State private var selectedDate: Date = Date()
     @State private var hasDate = false
     @State private var selectedProject: Project?
+    @State private var selectedPriority: Priority = .none
     @State private var detectedDate: Date?
     @State private var detectedCleanTitle: String?
     @FocusState private var isTitleFocused: Bool
@@ -103,6 +104,19 @@ struct QuickEntryView: View {
                     .controlSize(.small)
                 }
 
+                // Priority picker
+                Picker(selection: $selectedPriority) {
+                    Text("None").tag(Priority.none)
+                    Image(systemName: "arrow.down").tag(Priority.low)
+                    Image(systemName: "minus").tag(Priority.medium)
+                    Image(systemName: "exclamationmark").tag(Priority.high)
+                } label: {
+                    Label("Priority", systemImage: "flag")
+                        .font(.callout)
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 160)
+
                 Spacer()
 
                 // Project picker
@@ -150,6 +164,7 @@ struct QuickEntryView: View {
         viewModel.createTodoWithDetails(
             title: title,
             scheduledDate: date,
+            priority: selectedPriority,
             project: selectedProject
         )
         dismiss()

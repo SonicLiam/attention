@@ -31,9 +31,9 @@ struct iOSContentView: View {
         .tint(Color.attentionPrimary)
         .onAppear {
             viewModel.setup(modelContext: modelContext)
-            Task {
-                _ = await NotificationService.shared.requestAuthorization()
-            }
+        }
+        .onChange(of: modelContext) {
+            viewModel.setup(modelContext: modelContext)
         }
     }
 }
@@ -110,6 +110,10 @@ struct iOSTodoListView: View {
     @State private var todoToSchedule: Todo?
     @State private var detectedDate: Date?
     @State private var detectedCleanTitle: String?
+    @State private var newTodoScheduledDate: Date?
+    @State private var newTodoHasDate = false
+    @State private var newTodoPriority: Priority = .none
+    @State private var newTodoProject: Project?
 
     var body: some View {
         NavigationStack {
@@ -238,6 +242,7 @@ struct iOSTodoListView: View {
     private var newTodoSheet: some View {
         NavigationStack {
             Form {
+                // Title
                 Section {
                     TextField("What do you want to do?", text: $newTodoTitle)
                         .font(.headline)
@@ -252,6 +257,7 @@ struct iOSTodoListView: View {
                         }
                 }
 
+                // Natural language date suggestion
                 if let detected = detectedDate {
                     Section {
                         HStack {
@@ -259,17 +265,60 @@ struct iOSTodoListView: View {
                                 .foregroundStyle(Color.attentionPrimary)
                             Text("Schedule for \(detected.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()))")
                                 .font(.subheadline)
-                                .foregroundStyle(.secondary)
                             Spacer()
                             Button("Apply") {
-                                if let clean = detectedCleanTitle {
-                                    newTodoTitle = clean
-                                }
+                                newTodoScheduledDate = detected
+                                newTodoHasDate = true
+                                if let clean = detectedCleanTitle { newTodoTitle = clean }
                                 detectedDate = nil
                                 detectedCleanTitle = nil
                             }
-                            .font(.subheadline)
+                            .font(.subheadline.weight(.medium))
                             .foregroundStyle(Color.attentionPrimary)
+                        }
+                    }
+                }
+
+                // Schedule
+                Section {
+                    Toggle(isOn: $newTodoHasDate.animation()) {
+                        Label("Schedule", systemImage: "calendar")
+                    }
+                    if newTodoHasDate {
+                        DatePicker(
+                            "Date",
+                            selection: Binding(
+                                get: { newTodoScheduledDate ?? Date() },
+                                set: { newTodoScheduledDate = $0 }
+                            ),
+                            displayedComponents: [.date]
+                        )
+                        .tint(Color.attentionPrimary)
+                    }
+                }
+
+                // Priority
+                Section {
+                    Picker(selection: $newTodoPriority) {
+                        Label("None", systemImage: "circle").tag(Priority.none)
+                        Label("Low", systemImage: "arrow.down.circle").tag(Priority.low)
+                        Label("Medium", systemImage: "minus.circle").tag(Priority.medium)
+                        Label("High", systemImage: "exclamationmark.circle.fill").tag(Priority.high)
+                    } label: {
+                        Label("Priority", systemImage: "flag")
+                    }
+                }
+
+                // Project
+                if !viewModel.projects.isEmpty {
+                    Section {
+                        Picker(selection: $newTodoProject) {
+                            Text("None").tag(nil as Project?)
+                            ForEach(viewModel.projects) { project in
+                                Text(project.title).tag(project as Project?)
+                            }
+                        } label: {
+                            Label("Project", systemImage: "list.bullet.clipboard")
                         }
                     }
                 }
@@ -279,34 +328,48 @@ struct iOSTodoListView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        newTodoTitle = ""
-                        detectedDate = nil
-                        detectedCleanTitle = nil
+                        resetNewTodoForm()
                         showNewTodo = false
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
-                        let titleToUse = detectedCleanTitle ?? newTodoTitle
-                        let dateToUse = detectedDate
-                        if let dateToUse {
-                            viewModel.createTodoWithDetails(title: titleToUse, scheduledDate: dateToUse)
-                        } else {
-                            viewModel.createTodo(title: titleToUse)
-                        }
-                        newTodoTitle = ""
-                        detectedDate = nil
-                        detectedCleanTitle = nil
+                        submitNewTodo()
                         showNewTodo = false
-                        let generator = UINotificationFeedbackGenerator()
-                        generator.notificationOccurred(.success)
                     }
                     .fontWeight(.semibold)
                     .disabled(newTodoTitle.isEmpty)
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.large])
+    }
+
+    private func submitNewTodo() {
+        let title = detectedCleanTitle ?? newTodoTitle
+        guard !title.isEmpty else { return }
+        let date: Date? = newTodoHasDate ? (newTodoScheduledDate ?? Date()) : nil
+
+        viewModel.createTodoWithDetails(
+            title: title,
+            scheduledDate: date,
+            priority: newTodoPriority,
+            project: newTodoProject
+        )
+
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        resetNewTodoForm()
+    }
+
+    private func resetNewTodoForm() {
+        newTodoTitle = ""
+        detectedDate = nil
+        detectedCleanTitle = nil
+        newTodoScheduledDate = nil
+        newTodoHasDate = false
+        newTodoPriority = .none
+        newTodoProject = nil
     }
 
     // MARK: - Schedule Date Picker
